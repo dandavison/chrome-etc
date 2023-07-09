@@ -3,10 +3,9 @@
     "strict": true,
     "module": "commonjs",
     "target": "es6",
+    "lib": ["es6", "dom"],
     "esModuleInterop": true,
     "sourceMap": true,
-    "rootDir": "src",
-    "outDir": "dist/js",
     "noEmitOnError": true,
     "types": ["chrome-types"]
   }

@@ -21,6 +21,7 @@
     }
   },
   "permissions": ["scripting", "activeTab"],
+  "host_permissions": ["https://*.swimlanes.io/*"],
   "commands": {
     "_execute_action": {
       "suggested_key": {
