@@ -11,10 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 chrome.runtime.onInstalled.addListener(() => {
   chrome.action.setBadgeText({
-    text: 'OFF'
+    text: 'OFF',
   });
 });
 
@@ -32,20 +31,20 @@ chrome.action.onClicked.addListener(async (tab) => {
     // Set the action badge to the next state
     await chrome.action.setBadgeText({
       tabId: tab.id,
-      text: nextState
+      text: nextState,
     });
 
     if (nextState === 'ON') {
       // Insert the CSS file when the user turns the extension on
       await chrome.scripting.insertCSS({
         files: ['focus-mode.css'],
-        target: { tabId: tab.id }
+        target: { tabId: tab.id },
       });
     } else if (nextState === 'OFF') {
       // Remove the CSS file when the user turns the extension off
       await chrome.scripting.removeCSS({
         files: ['focus-mode.css'],
-        target: { tabId: tab.id }
+        target: { tabId: tab.id },
       });
     }
   }
