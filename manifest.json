@@ -12,6 +12,12 @@
   "background": {
     "service_worker": "background.js"
   },
+  "content_scripts": [
+    {
+      "matches": ["*://*.swimlanes.io/*"],
+      "js": ["content.js"]
+    }
+  ],
   "action": {
     "default_icon": {
       "16": "images/icon-16.png",
