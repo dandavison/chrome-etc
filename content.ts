@@ -1,11 +1,11 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.command === 'addLinksMenu') {
-    addLinksMenu();
+  if (request.command === 'initializeUI') {
+    addControls();
   }
 });
 
-function addLinksMenu() {
-  const targetDiv = document.querySelector('.clearfix');
+function addControls() {
+  const targetDiv = document.querySelector('.diagram');
 
   const radioHtml = `
       <div class="clearfix">
@@ -17,7 +17,7 @@ function addLinksMenu() {
       </div>`;
 
   if (targetDiv) {
-    targetDiv.innerHTML += radioHtml;
+    targetDiv.innerHTML = radioHtml + targetDiv.innerHTML;
 
     const githubRadio = document.getElementById('github');
     const vscodeRadio = document.getElementById('vscode');
