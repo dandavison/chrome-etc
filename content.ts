@@ -17,6 +17,42 @@ function addLinksMenu() {
       </div>`;
 
   if (targetDiv) {
-    targetDiv.innerHTML = targetDiv.innerHTML + radioHtml;
+    targetDiv.innerHTML += radioHtml;
+
+    const githubRadio = document.getElementById('github');
+    const vscodeRadio = document.getElementById('vscode');
+
+    githubRadio?.addEventListener('change', (e) => {
+      if (e.target?.checked) {
+        switchToGitHubLinks();
+      }
+    });
+
+    vscodeRadio?.addEventListener('change', (e) => {
+      if (e.target?.checked) {
+        switchToVSCodeLinks();
+      }
+    });
   }
+}
+
+function switchToVSCodeLinks() {
+  // Select all <a> elements in the .diagram element
+  const links = document.querySelectorAll('.diagram a');
+
+  links.forEach((link) => {
+    const href = link.getAttribute('href');
+    const regex =
+      /https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^\/]+)\/(.*)#L(\d+)/;
+    const match = href?.match(regex);
+    if (match) {
+      const [, user, repo, commit, path, line] = match;
+      const newUrl = `vscode-insiders://file/tmp/${user}/${repo}/${path}:${line}`;
+      link.setAttribute('href', newUrl);
+    }
+  });
+}
+
+function switchToGitHubLinks() {
+  console.log('switchToGitHubLinks');
 }
