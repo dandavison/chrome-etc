@@ -5,34 +5,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 function addControls() {
-  const targetDiv = document.querySelector('.diagram');
-
-  const radioHtml = `
+  const buttonHtml = `
       <div class="clearfix">
-        <label>Links:</label>
-        <input type="radio" id="github" name="link" value="github" checked>
-        <label for="github">GitHub</label>
-        <input type="radio" id="vscode" name="link" value="vscode">
-        <label for="vscode">VSCode</label>
+        <button id="convert">Convert to VSCode links</button>
       </div>`;
 
-  if (targetDiv) {
-    targetDiv.innerHTML = radioHtml + targetDiv.innerHTML;
+  for (const targetDiv of [
+    document.querySelector('.diagram'),
+    document.querySelector('.clearfix'),
+  ]) {
+    if (targetDiv) {
+      targetDiv.innerHTML = buttonHtml + targetDiv.innerHTML;
 
-    const githubRadio = document.getElementById('github');
-    const vscodeRadio = document.getElementById('vscode');
+      const convertButton = document.getElementById('convert');
 
-    githubRadio?.addEventListener('change', (e) => {
-      if (e.target?.checked) {
-        switchToGitHubLinks();
-      }
-    });
-
-    vscodeRadio?.addEventListener('change', (e) => {
-      if (e.target?.checked) {
+      convertButton?.addEventListener('click', () => {
         switchToVSCodeLinks();
-      }
-    });
+      });
+    }
   }
 }
 
