@@ -10,12 +10,12 @@ function addControls() {
         <button id="convert">Convert to VSCode links</button>
       </div>`;
 
-  for (const targetDiv of [
-    document.querySelector('.diagram'),
-    document.querySelector('.clearfix'),
-  ]) {
-    if (targetDiv) {
-      targetDiv.innerHTML = buttonHtml + targetDiv.innerHTML;
+  const diagramEl = document.querySelector('.diagram');
+  const menubarEl = document.querySelector('.clearfix');
+
+  for (const targetEl of [diagramEl, menubarEl]) {
+    if (targetEl) {
+      targetEl.innerHTML = buttonHtml + targetEl.innerHTML;
 
       const convertButton = document.getElementById('convert');
 
@@ -37,7 +37,7 @@ function switchToVSCodeLinks() {
     const match = href?.match(regex);
     if (match) {
       const [, user, repo, commit, path, line] = match;
-      const newUrl = `vscode-insiders://file/tmp/${user}/${repo}/${path}:${line}`;
+      const newUrl = `vscode-insiders://file/Users/dan/src/${user}/${repo}/${path}:${line}`;
       link.setAttribute('href', newUrl);
     }
   });
