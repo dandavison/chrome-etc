@@ -24,9 +24,29 @@ function addControls() {
       });
     }
   }
+
+  // Set up a mutation observer
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (let mutation of mutationsList) {
+      if (mutation.type === 'childList' || mutation.type === 'attributes') {
+        switchToVSCodeLinks();
+        break; // No need to iterate further
+      }
+    }
+  });
+
+  // Start observing the diagram div for child node and attribute changes
+  if (diagramEl) {
+    observer.observe(diagramEl, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    });
+  }
 }
 
 function switchToVSCodeLinks() {
+  console.log('switchToVSCodeLinks');
   // Select all <a> elements in the .diagram element
   const links = document.querySelectorAll('.diagram a');
 
