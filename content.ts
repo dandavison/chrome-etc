@@ -45,11 +45,17 @@ function addControls() {
   }
 }
 
+const REPO_PATHS = new Map([
+  [
+    'sdk-core',
+    '/Users/dan/src/temporalio/sdk-python/temporalio/bridge/sdk-core',
+  ],
+]);
+
 function switchToVSCodeLinks() {
   console.log('switchToVSCodeLinks');
   // Select all <a> elements in the .diagram element
   const links = document.querySelectorAll('.diagram a');
-
   links.forEach((link) => {
     const href = link.getAttribute('href');
     const regex =
@@ -57,7 +63,8 @@ function switchToVSCodeLinks() {
     const match = href?.match(regex);
     if (match) {
       const [, user, repo, commit, path, line] = match;
-      const newUrl = `vscode-insiders://file/Users/dan/src/${user}/${repo}/${path}:${line}`;
+      const repoPath = REPO_PATHS.get(repo) || `/Users/dan/src/${user}/${repo}`;
+      const newUrl = `vscode-insiders://file${repoPath}/${path}:${line}`;
       link.setAttribute('href', newUrl);
     }
   });
