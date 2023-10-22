@@ -1,3 +1,2 @@
 node_modules
-background.js
-content.js
+*.js
