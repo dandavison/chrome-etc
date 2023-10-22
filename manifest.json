@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "swimlanesio-links",
-  "description": "A chrome extension for working with VSCode links and GitHub permalinks in swimlanes.io",
+  "name": "dan-chrome-etc",
+  "description": "Chrome extension for anything",
   "version": "0.1",
   "background": {
     "service_worker": "background.js"
