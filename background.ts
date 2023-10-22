@@ -3,3 +3,9 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     chrome.tabs.sendMessage(tabId, { command: 'initializeUI' });
   }
 });
+
+chrome.webNavigation.onCompleted.addListener(function (details) {
+  if (details.url.startsWith('http://wormhole/')) {
+    chrome.tabs.remove(details.tabId);
+  }
+});
