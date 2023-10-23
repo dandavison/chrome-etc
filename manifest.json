@@ -13,7 +13,7 @@
     }
   ],
   "permissions": ["scripting", "activeTab", "webNavigation", "tabs"],
-  "host_permissions": ["https://*.swimlanes.io/*", "http://wormhole/*"],
+  "host_permissions": ["https://*.swimlanes.io/*", "http://proxy/*"],
   "commands": {
     "_execute_action": {
       "suggested_key": {
