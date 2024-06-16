@@ -6,14 +6,8 @@
   "background": {
     "service_worker": "background.js"
   },
-  "content_scripts": [
-    {
-      "matches": ["*://*.swimlanes.io/*"],
-      "js": ["content.js"]
-    }
-  ],
+  "content_scripts": [],
   "permissions": ["scripting", "activeTab", "webNavigation", "tabs"],
-  "host_permissions": ["https://*.swimlanes.io/*", "http://proxy/*"],
   "commands": {
     "_execute_action": {
       "suggested_key": {
