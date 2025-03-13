@@ -1,2 +1,2 @@
 build:
-	tsc background.ts
+	tsc

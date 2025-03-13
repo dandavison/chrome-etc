@@ -7,6 +7,6 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "noEmitOnError": true,
-    "types": ["chrome-types"]
+    "types": ["chrome"]
   }
 }

@@ -1,5 +1,5 @@
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && /^http/.test(tab.url)) {
+  if (changeInfo.status === 'complete' && tab.url && /^http/.test(tab.url)) {
     chrome.tabs.sendMessage(tabId, { command: 'initializeUI' });
   }
 });
