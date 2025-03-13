@@ -5,7 +5,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 });
 
 chrome.webNavigation.onCompleted.addListener(function (details) {
-  if (details.url.startsWith('http://wormhole/')) {
+  if (details.url.startsWith('http://wormhole') || details.url.startsWith('https://temporaltechnologies.slack.com/')) {
     chrome.tabs.remove(details.tabId);
   }
 });
