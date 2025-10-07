@@ -56,7 +56,10 @@
       });
     }, true);
 
-    console.log('[GitHub Comment Editor] Event listeners attached');
+    // Listen for double-click to edit specific comment
+    document.addEventListener('dblclick', handleDoubleClick, true);
+
+    console.log('[GitHub Comment Editor] Event listeners attached (keyboard and double-click)');
   }
 
   function isGitHubIssuePage(): boolean {
@@ -72,15 +75,15 @@
       shiftKey: event.shiftKey,
       isEnter: event.key === 'Enter'
     });
-    
+
     // Check for Shift+Enter combination
     if (event.shiftKey && event.key === 'Enter') {
       console.log('[GitHub Comment Editor] Shift+Enter detected!');
-      
+
       // Don't trigger if user is already typing in an input/textarea
       const activeElement = document.activeElement;
       console.log('[GitHub Comment Editor] Active element:', activeElement?.tagName, activeElement);
-      
+
       if (activeElement && (
         activeElement.tagName === 'INPUT' ||
         activeElement.tagName === 'TEXTAREA' ||
@@ -91,7 +94,7 @@
       }
 
       console.log('[GitHub Comment Editor] Preventing default and triggering edit');
-      
+
       // Prevent default behavior
       event.preventDefault();
       event.stopPropagation();
@@ -99,6 +102,45 @@
       // Find and edit the current comment
       editCurrentComment();
     }
+  }
+
+  function handleDoubleClick(event: MouseEvent): void {
+    console.log('[GitHub Comment Editor] Double-click detected on:', event.target);
+
+    // Find the parent comment container from where the user double-clicked
+    const target = event.target as HTMLElement;
+    const commentContainer = target.closest('[id^="issuecomment-"], [data-testid="issue-viewer-container"]');
+    
+    if (!commentContainer) {
+      console.log('[GitHub Comment Editor] Double-click was not inside a comment');
+      return;
+    }
+
+    console.log('[GitHub Comment Editor] Double-click inside comment:', commentContainer.id || 'issue-body');
+
+    // Don't trigger if user is double-clicking in an already editable field
+    const activeElement = document.activeElement;
+    if (activeElement && (
+      activeElement.tagName === 'INPUT' ||
+      activeElement.tagName === 'TEXTAREA' ||
+      activeElement.getAttribute('contenteditable') === 'true'
+    )) {
+      console.log('[GitHub Comment Editor] User is in an input field, not triggering');
+      return;
+    }
+
+    // Prevent text selection from the double-click
+    event.preventDefault();
+    event.stopPropagation();
+    
+    // Clear any text selection that may have occurred
+    const selection = window.getSelection();
+    if (selection) {
+      selection.removeAllRanges();
+    }
+
+    // Edit this specific comment
+    editSpecificComment(commentContainer);
   }
 
   function editCurrentComment(): void {
@@ -183,6 +225,21 @@
     }
   }
 
+  function editSpecificComment(commentElement: Element): void {
+    console.log('[GitHub Comment Editor] editSpecificComment called for:', commentElement.id || 'issue-body');
+    
+    // Find and click the edit button for this specific comment
+    const editButton = findEditButton(commentElement);
+    
+    if (editButton) {
+      // Click the edit button
+      (editButton as HTMLElement).click();
+      console.log('[GitHub Comment Editor] Triggered edit for specific comment');
+    } else {
+      console.log('[GitHub Comment Editor] Could not find edit button for this comment');
+    }
+  }
+  
   function findEditButton(commentElement: Element): Element | null {
     console.log('[GitHub Comment Editor] Looking for edit button...');
     
