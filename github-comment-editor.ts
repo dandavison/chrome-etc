@@ -75,35 +75,51 @@
     console.log('[GitHub Comment Editor] editCurrentComment called');
     
     // Get all timeline items (comments and the issue/PR description)
-    const allTimelineItems = document.querySelectorAll('.timeline-comment');
-    console.log('[GitHub Comment Editor] Found timeline items:', allTimelineItems.length);
+    // GitHub has changed their HTML structure, now using .comment instead of .timeline-comment
+    let allTimelineItems = document.querySelectorAll('.timeline-comment');
+    console.log('[GitHub Comment Editor] Found .timeline-comment items:', allTimelineItems.length);
     
+    // If old selector doesn't work, try the new one
     if (allTimelineItems.length === 0) {
-      console.log('[GitHub Comment Editor] No comments found on this page');
-      // Try alternative selectors
-      const alternatives = {
-        '.js-comment-container': document.querySelectorAll('.js-comment-container'),
-        '.comment': document.querySelectorAll('.comment'),
-        '.timeline-comment-wrapper': document.querySelectorAll('.timeline-comment-wrapper'),
-        '[role="article"]': document.querySelectorAll('[role="article"]')
-      };
-      console.log('[GitHub Comment Editor] Alternative selectors found:', alternatives);
-      return;
+      allTimelineItems = document.querySelectorAll('.comment');
+      console.log('[GitHub Comment Editor] Found .comment items:', allTimelineItems.length);
+      
+      if (allTimelineItems.length === 0) {
+        console.log('[GitHub Comment Editor] No comments found on this page');
+        return;
+      }
     }
 
+    // Filter to only get actual comment containers (not code comments or other .comment elements)
+    // Look for comments that have edit buttons/menus
+    const actualComments = Array.from(allTimelineItems).filter(el => {
+      // Check if this looks like an actual comment by looking for action buttons
+      return el.querySelector('button[aria-label*="options" i]') || 
+             el.querySelector('.octicon-kebab-horizontal') ||
+             el.querySelector('button.btn-octicon') ||
+             el.querySelector('[role="button"]');
+    });
+    
+    console.log('[GitHub Comment Editor] Filtered to actual comments:', actualComments.length);
+    
+    if (actualComments.length === 0) {
+      console.log('[GitHub Comment Editor] No editable comments found');
+      return;
+    }
+    
     // Determine the "current" comment
     // Strategy: Last comment if there are multiple, otherwise the issue description (first item)
     let targetComment: Element;
     
-    // Check if there's more than one timeline item
-    if (allTimelineItems.length > 1) {
+    // Check if there's more than one comment
+    if (actualComments.length > 1) {
       // Get the last actual comment (not the issue description)
-      // The first timeline-comment is usually the issue/PR description
-      targetComment = allTimelineItems[allTimelineItems.length - 1];
+      // The first comment is usually the issue/PR description
+      targetComment = actualComments[actualComments.length - 1];
       console.log('[GitHub Comment Editor] Selected last comment as target');
     } else {
       // Only the issue/PR description exists
-      targetComment = allTimelineItems[0];
+      targetComment = actualComments[0];
       console.log('[GitHub Comment Editor] Selected issue/PR description as target');
     }
 
@@ -128,19 +144,35 @@
     // First, try to find the kebab menu button (three dots)
     const selectors = [
       'button[aria-label*="Show options"]',
+      'button[aria-label="Show options"]',
+      'button[aria-label="More options"]',
       'details.js-comment-header-actions-menu summary',
       'summary[aria-label*="Show options"]',
-      '.octicon-kebab-horizontal'
+      '.octicon-kebab-horizontal',
+      '.octicon-kebab-horizontal',
+      // New GitHub selectors
+      'button.timeline-comment-action',
+      'button.btn-octicon',
+      '[aria-label*="options" i]',
+      '[aria-label*="menu" i]'
     ];
     
     let kebabButton: Element | null = null;
     for (const selector of selectors) {
-      const found = selector === '.octicon-kebab-horizontal' 
-        ? commentElement.querySelector(selector)?.closest('summary')
-        : commentElement.querySelector(selector);
+      let found: Element | null | undefined;
+      
+      if (selector === '.octicon-kebab-horizontal') {
+        // For the kebab icon, find its parent button/summary
+        const icon = commentElement.querySelector(selector);
+        found = icon?.closest('button') || icon?.closest('summary');
+      } else {
+        found = commentElement.querySelector(selector);
+      }
+      
       console.log(`[GitHub Comment Editor] Selector "${selector}" found:`, !!found);
       if (found) {
         kebabButton = found;
+        console.log('[GitHub Comment Editor] Using selector:', selector);
         break;
       }
     }
