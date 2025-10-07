@@ -131,29 +131,50 @@
     // Find the parent comment container from where the user double-clicked
     const target = event.target as HTMLElement;
     
-    // First check if we're in an issue comment (not the issue description)
-    let commentContainer = target.closest('[id^="issuecomment-"]');
+    // First, look for the closest issue comment
+    let commentContainer = target.closest('[id^="issuecomment-"]') as HTMLElement | null;
     
-    // If not in a comment, check if we're in the issue body
-    if (!commentContainer) {
-      // Check if we're in the issue description area
-      const issueBody = target.closest('[data-testid="issue-viewer-container"]');
-      if (issueBody) {
-        // Make sure we're actually in the issue body text, not in a comment
-        const parentComment = target.closest('[id^="issuecomment-"]');
-        if (!parentComment) {
-          commentContainer = issueBody;
+    if (commentContainer) {
+      console.log('[GitHub Comment Editor] Found issue comment:', commentContainer.id);
+    } else {
+      // Not in a comment, check if we're in the issue description
+      // The issue description is the first comment-like element but doesn't have an issuecomment ID
+      
+      // Look for various issue body containers
+      const issueBodySelectors = [
+        '[data-testid="issue-body"]',
+        '[data-testid="issue-viewer-container"]',
+        '.js-issue-body',
+        '[class*="IssueBodyViewer"]'
+      ];
+      
+      for (const selector of issueBodySelectors) {
+        const possibleIssueBody = target.closest(selector) as HTMLElement | null;
+        if (possibleIssueBody) {
+          // Make sure we're not actually inside a comment that's within the issue viewer
+          const containsComment = target.closest('[id^="issuecomment-"]');
+          if (!containsComment) {
+            console.log('[GitHub Comment Editor] Found issue body with selector:', selector);
+            commentContainer = possibleIssueBody;
+            break;
+          }
         }
       }
     }
     
     if (!commentContainer) {
       console.log('[GitHub Comment Editor] Double-click was not inside a comment or issue body');
+      console.log('[GitHub Comment Editor] Target element chain:');
+      let current: HTMLElement | null = target;
+      for (let i = 0; i < 5 && current; i++) {
+        console.log(`  Level ${i}: ${current.tagName} id="${current.id}" class="${current.className?.substring(0, 50)}"`);
+        current = current.parentElement;
+      }
       return;
     }
 
     console.log('[GitHub Comment Editor] Double-click inside:', commentContainer.id || 'issue-body');
-    console.log('[GitHub Comment Editor] Container element:', commentContainer);
+    console.log('[GitHub Comment Editor] Container type:', commentContainer.id?.startsWith('issuecomment') ? 'comment' : 'issue-body');
 
     // Don't trigger if user is double-clicking in an already editable field
     const activeElement = document.activeElement;
