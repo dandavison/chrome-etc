@@ -112,7 +112,11 @@
         // Strategy: Walk up the DOM tree looking for either a comment or the issue body
         let current = target;
         let foundIssueViewer = false;
-        while (current && !commentContainer) {
+        let depth = 0;
+        console.log('[GitHub Comment Editor] Walking up DOM tree to find container...');
+        while (current && !commentContainer && depth < 20) {
+            // Log each level for debugging
+            console.log(`[GitHub Comment Editor] Level ${depth}: ${current.tagName} id="${current.id}" data-testid="${current.getAttribute('data-testid')}" class="${current.className?.substring(0, 50)}"`);
             // Check if this element is a comment
             if (current.id && current.id.startsWith('issuecomment-')) {
                 console.log('[GitHub Comment Editor] Found issue comment:', current.id);
@@ -121,6 +125,7 @@
             }
             // Check if this is a comment header (sometimes the ID is on a parent)
             if (current.getAttribute('data-testid') === 'comment-header') {
+                console.log('[GitHub Comment Editor] Found comment header, looking for parent with ID...');
                 // Look for the issuecomment ID in parents
                 const parentWithId = current.closest('[id^="issuecomment-"]');
                 if (parentWithId) {
@@ -135,6 +140,7 @@
                 foundIssueViewer = true;
             }
             current = current.parentElement;
+            depth++;
         }
         // If no comment was found but we're inside the issue viewer, treat as issue description
         if (!commentContainer && foundIssueViewer) {
