@@ -6,7 +6,13 @@
   "background": {
     "service_worker": "background.js"
   },
-  "content_scripts": [],
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*"],
+      "js": ["github-comment-editor.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "permissions": ["scripting", "activeTab", "webNavigation", "tabs"],
   "host_permissions": ["http://wormhole:7117/*", "https://temporaltechnologies.slack.com/*", "https://temporalio.slack.com/*"],
   "commands": {
