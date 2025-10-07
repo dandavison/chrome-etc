@@ -1,5 +1,7 @@
 // GitHub Comment Editor Content Script
-// Allows Shift+Enter to edit the "current" comment on GitHub issues/PR pages
+// Allows Shift+Cmd+P to edit the "current" comment on GitHub issues/PR pages
+// Also supports double-click to edit any specific comment
+// Escape key cancels editing
 
 (function() {
   console.log('[GitHub Comment Editor] Script loaded, checking URL...');
@@ -40,7 +42,7 @@
   }
 
   function setupEventListeners() {
-    // Listen for Shift+Enter keypress
+    // Listen for keyboard shortcuts (Shift+Cmd+P and Escape)
     document.addEventListener('keydown', handleKeyPress, true); // Use capture phase
 
     // Also log all key events for debugging
@@ -59,7 +61,7 @@
     // Listen for double-click to edit specific comment
     document.addEventListener('dblclick', handleDoubleClick, true);
 
-    console.log('[GitHub Comment Editor] Event listeners attached (keyboard and double-click)');
+    console.log('[GitHub Comment Editor] Event listeners attached (Shift+Cmd+P, Escape, and double-click)');
   }
 
   function isGitHubIssuePage(): boolean {
@@ -73,12 +75,13 @@
     console.log('[GitHub Comment Editor] handleKeyPress called with:', {
       key: event.key,
       shiftKey: event.shiftKey,
-      isEnter: event.key === 'Enter'
+      metaKey: event.metaKey,
+      keyCombo: `${event.shiftKey ? 'Shift+' : ''}${event.metaKey ? 'Cmd+' : ''}${event.key}`
     });
 
-    // Check for Shift+Enter combination
-    if (event.shiftKey && event.key === 'Enter') {
-      console.log('[GitHub Comment Editor] Shift+Enter detected!');
+    // Check for Shift+Cmd+P combination (toggle edit/preview)
+    if (event.shiftKey && event.metaKey && event.key.toLowerCase() === 'p') {
+      console.log('[GitHub Comment Editor] Shift+Cmd+P detected!');
 
       // Don't trigger if user is already typing in an input/textarea
       const activeElement = document.activeElement;
@@ -102,6 +105,24 @@
       // Find and edit the current comment
       editCurrentComment();
     }
+    
+    // Check for Escape key to cancel editing
+    if (event.key === 'Escape') {
+      console.log('[GitHub Comment Editor] Escape key detected');
+      
+      // Look for a visible Cancel button in any comment edit form
+      const cancelButtons = document.querySelectorAll('button[type="button"]');
+      for (const button of Array.from(cancelButtons)) {
+        const text = button.textContent?.trim().toLowerCase();
+        if (text === 'cancel' && (button as HTMLElement).offsetParent !== null) {
+          console.log('[GitHub Comment Editor] Found and clicking Cancel button');
+          (button as HTMLElement).click();
+          event.preventDefault();
+          event.stopPropagation();
+          break;
+        }
+      }
+    }
   }
 
   function handleDoubleClick(event: MouseEvent): void {
@@ -109,14 +130,30 @@
 
     // Find the parent comment container from where the user double-clicked
     const target = event.target as HTMLElement;
-    const commentContainer = target.closest('[id^="issuecomment-"], [data-testid="issue-viewer-container"]');
+    
+    // First check if we're in an issue comment (not the issue description)
+    let commentContainer = target.closest('[id^="issuecomment-"]');
+    
+    // If not in a comment, check if we're in the issue body
+    if (!commentContainer) {
+      // Check if we're in the issue description area
+      const issueBody = target.closest('[data-testid="issue-viewer-container"]');
+      if (issueBody) {
+        // Make sure we're actually in the issue body text, not in a comment
+        const parentComment = target.closest('[id^="issuecomment-"]');
+        if (!parentComment) {
+          commentContainer = issueBody;
+        }
+      }
+    }
     
     if (!commentContainer) {
-      console.log('[GitHub Comment Editor] Double-click was not inside a comment');
+      console.log('[GitHub Comment Editor] Double-click was not inside a comment or issue body');
       return;
     }
 
-    console.log('[GitHub Comment Editor] Double-click inside comment:', commentContainer.id || 'issue-body');
+    console.log('[GitHub Comment Editor] Double-click inside:', commentContainer.id || 'issue-body');
+    console.log('[GitHub Comment Editor] Container element:', commentContainer);
 
     // Don't trigger if user is double-clicking in an already editable field
     const activeElement = document.activeElement;
