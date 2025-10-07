@@ -1,11 +1,15 @@
 "use strict";
 // GitHub Comment Editor Content Script
-// Allows Shift+Cmd+P to edit the "current" comment on GitHub issues/PR pages
-// Also supports double-click to edit any specific comment
-// Escape key cancels editing
+// Features:
+// - Shift+Cmd+P: Edit last edited comment (or last comment if none edited yet)
+// - Double-click: Edit specific comment where you clicked
+// - Escape: Cancel editing
+// Maintains state of last edited comment for quick re-editing
 (function () {
     console.log('[GitHub Comment Editor] Script loaded, checking URL...');
     console.log('[GitHub Comment Editor] Current URL:', window.location.href);
+    // State: Track the last edited comment
+    let lastEditedComment = null;
     // Only run on GitHub issue/PR pages
     if (!isGitHubIssuePage()) {
         console.log('[GitHub Comment Editor] Not a GitHub issue/PR page, exiting');
@@ -81,8 +85,21 @@
             // Prevent default behavior
             event.preventDefault();
             event.stopPropagation();
-            // Find and edit the current comment
-            editCurrentComment();
+            // If we have a last edited comment, use that; otherwise use current comment
+            if (lastEditedComment && document.contains(lastEditedComment)) {
+                console.log('[GitHub Comment Editor] Re-editing last edited comment');
+                editSpecificComment(lastEditedComment);
+            }
+            else {
+                if (lastEditedComment && !document.contains(lastEditedComment)) {
+                    console.log('[GitHub Comment Editor] Last edited comment no longer exists in DOM');
+                    lastEditedComment = null;
+                }
+                else {
+                    console.log('[GitHub Comment Editor] No last edited comment, using current comment');
+                }
+                editCurrentComment();
+            }
         }
         // Check for Escape key to cancel editing
         if (event.key === 'Escape') {
@@ -250,6 +267,12 @@
             // Click the edit button
             editButton.click();
             console.log('[GitHub Comment Editor] Triggered edit for current comment');
+            // Save this as the last edited comment
+            lastEditedComment = targetComment;
+            const identifier = targetComment.id ||
+                targetComment.getAttribute('data-testid') ||
+                'issue-body';
+            console.log('[GitHub Comment Editor] Saved as last edited comment:', identifier);
         }
         else {
             console.log('[GitHub Comment Editor] Could not find edit button for current comment');
@@ -263,13 +286,19 @@
         }
     }
     function editSpecificComment(commentElement) {
-        console.log('[GitHub Comment Editor] editSpecificComment called for:', commentElement.id || 'issue-body');
+        const identifier = commentElement.id ||
+            commentElement.getAttribute('data-testid') ||
+            'issue-body';
+        console.log('[GitHub Comment Editor] editSpecificComment called for:', identifier);
         // Find and click the edit button for this specific comment
         const editButton = findEditButton(commentElement);
         if (editButton) {
             // Click the edit button
             editButton.click();
             console.log('[GitHub Comment Editor] Triggered edit for specific comment');
+            // Save this as the last edited comment
+            lastEditedComment = commentElement;
+            console.log('[GitHub Comment Editor] Saved as last edited comment:', identifier);
         }
         else {
             console.log('[GitHub Comment Editor] Could not find edit button for this comment');
