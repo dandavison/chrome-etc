@@ -2,26 +2,53 @@
 // GitHub Comment Editor Content Script
 // Allows Shift+Enter to edit the "current" comment on GitHub issues/PR pages
 (function () {
+    console.log('[GitHub Comment Editor] Script loaded, checking URL...');
+    console.log('[GitHub Comment Editor] Current URL:', window.location.href);
     // Only run on GitHub issue/PR pages
     if (!isGitHubIssuePage()) {
+        console.log('[GitHub Comment Editor] Not a GitHub issue/PR page, exiting');
         return;
     }
+    console.log('[GitHub Comment Editor] GitHub issue/PR page detected, setting up listener');
     // Listen for Shift+Enter keypress
-    document.addEventListener('keydown', handleKeyPress);
+    document.addEventListener('keydown', handleKeyPress, true); // Use capture phase
+    // Also log all key events for debugging
+    document.addEventListener('keydown', (event) => {
+        console.log('[GitHub Comment Editor] Key pressed:', {
+            key: event.key,
+            code: event.code,
+            shiftKey: event.shiftKey,
+            metaKey: event.metaKey,
+            ctrlKey: event.ctrlKey,
+            altKey: event.altKey,
+            target: event.target
+        });
+    }, true);
     function isGitHubIssuePage() {
         const url = window.location.href;
-        return /github\.com\/[^\/]+\/[^\/]+\/(issues|pull)\/\d+/.test(url);
+        const isIssuePage = /github\.com\/[^\/]+\/[^\/]+\/(issues|pull)\/\d+/.test(url);
+        console.log('[GitHub Comment Editor] URL match result:', isIssuePage);
+        return isIssuePage;
     }
     function handleKeyPress(event) {
+        console.log('[GitHub Comment Editor] handleKeyPress called with:', {
+            key: event.key,
+            shiftKey: event.shiftKey,
+            isEnter: event.key === 'Enter'
+        });
         // Check for Shift+Enter combination
         if (event.shiftKey && event.key === 'Enter') {
+            console.log('[GitHub Comment Editor] Shift+Enter detected!');
             // Don't trigger if user is already typing in an input/textarea
             const activeElement = document.activeElement;
+            console.log('[GitHub Comment Editor] Active element:', activeElement?.tagName, activeElement);
             if (activeElement && (activeElement.tagName === 'INPUT' ||
                 activeElement.tagName === 'TEXTAREA' ||
                 activeElement.getAttribute('contenteditable') === 'true')) {
+                console.log('[GitHub Comment Editor] User is typing in an input field, not triggering');
                 return;
             }
+            console.log('[GitHub Comment Editor] Preventing default and triggering edit');
             // Prevent default behavior
             event.preventDefault();
             event.stopPropagation();
@@ -30,10 +57,20 @@
         }
     }
     function editCurrentComment() {
+        console.log('[GitHub Comment Editor] editCurrentComment called');
         // Get all timeline items (comments and the issue/PR description)
         const allTimelineItems = document.querySelectorAll('.timeline-comment');
+        console.log('[GitHub Comment Editor] Found timeline items:', allTimelineItems.length);
         if (allTimelineItems.length === 0) {
             console.log('[GitHub Comment Editor] No comments found on this page');
+            // Try alternative selectors
+            const alternatives = {
+                '.js-comment-container': document.querySelectorAll('.js-comment-container'),
+                '.comment': document.querySelectorAll('.comment'),
+                '.timeline-comment-wrapper': document.querySelectorAll('.timeline-comment-wrapper'),
+                '[role="article"]': document.querySelectorAll('[role="article"]')
+            };
+            console.log('[GitHub Comment Editor] Alternative selectors found:', alternatives);
             return;
         }
         // Determine the "current" comment
@@ -44,11 +81,14 @@
             // Get the last actual comment (not the issue description)
             // The first timeline-comment is usually the issue/PR description
             targetComment = allTimelineItems[allTimelineItems.length - 1];
+            console.log('[GitHub Comment Editor] Selected last comment as target');
         }
         else {
             // Only the issue/PR description exists
             targetComment = allTimelineItems[0];
+            console.log('[GitHub Comment Editor] Selected issue/PR description as target');
         }
+        console.log('[GitHub Comment Editor] Target comment element:', targetComment);
         // Find the edit button in the target comment
         const editButton = findEditButton(targetComment);
         if (editButton) {
@@ -58,15 +98,31 @@
         }
         else {
             console.log('[GitHub Comment Editor] Could not find edit button for current comment');
+            console.log('[GitHub Comment Editor] Target comment HTML:', targetComment.innerHTML.substring(0, 500));
         }
     }
     function findEditButton(commentElement) {
+        console.log('[GitHub Comment Editor] Looking for edit button...');
         // First, try to find the kebab menu button (three dots)
-        const kebabButton = commentElement.querySelector('button[aria-label*="Show options"]') ||
-            commentElement.querySelector('details.js-comment-header-actions-menu summary') ||
-            commentElement.querySelector('summary[aria-label*="Show options"]') ||
-            commentElement.querySelector('.octicon-kebab-horizontal')?.closest('summary');
+        const selectors = [
+            'button[aria-label*="Show options"]',
+            'details.js-comment-header-actions-menu summary',
+            'summary[aria-label*="Show options"]',
+            '.octicon-kebab-horizontal'
+        ];
+        let kebabButton = null;
+        for (const selector of selectors) {
+            const found = selector === '.octicon-kebab-horizontal'
+                ? commentElement.querySelector(selector)?.closest('summary')
+                : commentElement.querySelector(selector);
+            console.log(`[GitHub Comment Editor] Selector "${selector}" found:`, !!found);
+            if (found) {
+                kebabButton = found;
+                break;
+            }
+        }
         if (kebabButton) {
+            console.log('[GitHub Comment Editor] Kebab button found, clicking it');
             // Click the kebab menu to open it
             kebabButton.click();
             // Use MutationObserver to wait for the menu to appear
@@ -84,6 +140,7 @@
                 subtree: true
             });
             // Set a timeout to stop observing and close menu if edit button not found
+            const kebabButtonElement = kebabButton;
             setTimeout(() => {
                 observer.disconnect();
                 const editMenuItem = findEditMenuItem();
@@ -95,7 +152,7 @@
                     }
                     else {
                         // Try clicking the kebab button again to close it
-                        kebabButton.click();
+                        kebabButtonElement.click();
                     }
                     console.log('[GitHub Comment Editor] Edit option not found in menu');
                 }
