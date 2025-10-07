@@ -225,43 +225,50 @@
     }
     function findEditMenuItem() {
         console.log('[GitHub Comment Editor] Looking for edit menu item...');
-        // GitHub's menu items can be in various containers
-        const menuSelectors = [
-            'button[role="menuitem"][data-hotkey="e"]',
-            'button[role="menuitem"][aria-label*="Edit"]',
-            '.js-comment-edit-button[role="menuitem"]',
-            'button[role="menuitem"]',
-            'li[role="menuitem"] button',
+        // First, find all potential menu items
+        const allSelectors = [
             'a[role="menuitem"]',
-            '[role="menu"] button',
-            '[role="menu"] a',
-            // GitHub sometimes uses ActionList components
+            'button[role="menuitem"]',
             '.ActionListItem',
             'li.ActionListItem',
-            // Or primer components
-            '[data-component*="ActionList"] button'
+            '[role="menu"] a',
+            '[role="menu"] button'
         ];
-        for (const selector of menuSelectors) {
+        // Collect all potential menu items
+        const menuItems = [];
+        for (const selector of allSelectors) {
             const elements = document.querySelectorAll(selector);
-            console.log(`[GitHub Comment Editor] Checking ${selector}: found ${elements.length} elements`);
             for (const el of Array.from(elements)) {
-                const text = el.textContent?.trim().toLowerCase();
-                const ariaLabel = el.getAttribute('aria-label')?.toLowerCase();
-                // Check for edit-related text
-                if (text === 'edit' ||
-                    text === 'edit comment' ||
-                    text?.includes('edit') ||
-                    ariaLabel?.includes('edit')) {
-                    console.log('[GitHub Comment Editor] Found edit menu item!', el);
-                    return el;
+                if (!menuItems.includes(el)) {
+                    menuItems.push(el);
                 }
             }
         }
-        // Log all visible menu items for debugging
-        const allMenuItems = document.querySelectorAll('[role="menuitem"], [role="menu"] button, .ActionListItem');
-        console.log('[GitHub Comment Editor] All menu items found:', allMenuItems.length);
-        allMenuItems.forEach((item, i) => {
-            console.log(`  Item ${i}: ${item.textContent?.trim().substring(0, 50)}`);
+        console.log(`[GitHub Comment Editor] Found ${menuItems.length} unique menu items`);
+        // Now search for "Edit" in all of them
+        for (const el of menuItems) {
+            const text = el.textContent?.trim();
+            const ariaLabel = el.getAttribute('aria-label');
+            console.log(`[GitHub Comment Editor] Checking item: "${text?.substring(0, 30)}"`);
+            // Check for exact "Edit" match (case-insensitive)
+            if (text?.toLowerCase() === 'edit' ||
+                text?.toLowerCase() === 'edit comment' ||
+                ariaLabel?.toLowerCase().includes('edit')) {
+                console.log('[GitHub Comment Editor] Found edit menu item!', el);
+                // Check if this element is clickable, if not find the clickable child/parent
+                if (el.tagName === 'LI' || el.tagName === 'DIV') {
+                    // If it's a list item or div, find the actual clickable element inside
+                    const clickable = el.querySelector('a, button') || el;
+                    console.log('[GitHub Comment Editor] Using clickable element:', clickable);
+                    return clickable;
+                }
+                return el;
+            }
+        }
+        // Log first 10 menu items for debugging if not found
+        console.log('[GitHub Comment Editor] Edit not found. First 10 menu items:');
+        menuItems.slice(0, 10).forEach((item, i) => {
+            console.log(`  ${i}: "${item.textContent?.trim()}" [${item.tagName}]`);
         });
         return null;
     }
