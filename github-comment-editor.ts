@@ -145,30 +145,51 @@
     console.log('[GitHub Comment Editor] Walking up DOM tree to find container...');
     
     while (current && !commentContainer && depth < 20) {
-      // Log each level for debugging
-      console.log(`[GitHub Comment Editor] Level ${depth}: ${current.tagName} id="${current.id}" data-testid="${current.getAttribute('data-testid')}" class="${current.className?.substring(0, 50)}"`);
+      const dataTestId = current.getAttribute('data-testid');
       
-      // Check if this element is a comment
+      // Log each level for debugging
+      console.log(`[GitHub Comment Editor] Level ${depth}: ${current.tagName} id="${current.id}" data-testid="${dataTestId}" class="${current.className?.substring(0, 50)}"`);
+      
+      // Check if this element is a comment using old ID format
       if (current.id && current.id.startsWith('issuecomment-')) {
-        console.log('[GitHub Comment Editor] Found issue comment:', current.id);
+        console.log('[GitHub Comment Editor] Found issue comment by ID:', current.id);
         commentContainer = current;
         break;
       }
       
-      // Check if this is a comment header (sometimes the ID is on a parent)
-      if (current.getAttribute('data-testid') === 'comment-header') {
-        console.log('[GitHub Comment Editor] Found comment header, looking for parent with ID...');
-        // Look for the issuecomment ID in parents
-        const parentWithId = current.closest('[id^="issuecomment-"]') as HTMLElement | null;
-        if (parentWithId) {
-          console.log('[GitHub Comment Editor] Found issue comment via header:', parentWithId.id);
-          commentContainer = parentWithId;
-          break;
+      // Check if this element is a comment using new data-testid format
+      // Comments have data-testid like "comment-viewer-outer-box-XXX" or "timeline-row-border-XXX"
+      if (dataTestId && (
+        dataTestId.startsWith('comment-viewer-outer-box-') ||
+        dataTestId.startsWith('timeline-row-border-')
+      )) {
+        const commentId = dataTestId.split('-').pop();
+        console.log('[GitHub Comment Editor] Found issue comment by data-testid:', commentId);
+        commentContainer = current;
+        break;
+      }
+      
+      // Check if this is a comment header
+      if (dataTestId === 'comment-header') {
+        console.log('[GitHub Comment Editor] Found comment header, looking for parent with comment identifier...');
+        // Look up for a comment container
+        let parent = current.parentElement;
+        while (parent && depth < 15) {
+          const parentTestId = parent.getAttribute('data-testid');
+          if (parent.id?.startsWith('issuecomment-') || 
+              parentTestId?.startsWith('comment-viewer-outer-box-') ||
+              parentTestId?.startsWith('timeline-row-border-')) {
+            console.log('[GitHub Comment Editor] Found comment container:', parent.id || parentTestId);
+            commentContainer = parent;
+            break;
+          }
+          parent = parent.parentElement;
         }
+        if (commentContainer) break;
       }
       
       // Track if we've seen the issue viewer container
-      if (current.getAttribute('data-testid') === 'issue-viewer-container' || 
+      if (dataTestId === 'issue-viewer-container' || 
           current.className?.includes('IssueBodyViewer')) {
         foundIssueViewer = true;
       }
