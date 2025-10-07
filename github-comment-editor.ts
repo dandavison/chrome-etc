@@ -12,22 +12,52 @@
   }
 
   console.log('[GitHub Comment Editor] GitHub issue/PR page detected, setting up listener');
-  
-  // Listen for Shift+Enter keypress
-  document.addEventListener('keydown', handleKeyPress, true); // Use capture phase
-  
-  // Also log all key events for debugging
-  document.addEventListener('keydown', (event) => {
-    console.log('[GitHub Comment Editor] Key pressed:', {
-      key: event.key,
-      code: event.code,
-      shiftKey: event.shiftKey,
-      metaKey: event.metaKey,
-      ctrlKey: event.ctrlKey,
-      altKey: event.altKey,
-      target: event.target
-    });
-  }, true);
+
+  // Wait for the page to fully load comments (GitHub uses React and loads comments dynamically)
+  setupWhenReady();
+
+  function setupWhenReady() {
+    // Check if comments have loaded yet
+    const checkForComments = () => {
+      // GitHub loads comments dynamically, look for them with various selectors
+      const hasComments = 
+        document.querySelector('[id^="issuecomment-"]') || 
+        document.querySelector('[class*="IssueBodyViewer"]') ||
+        document.querySelector('[data-testid="issue-viewer-container"]');
+      
+      console.log('[GitHub Comment Editor] Checking for comments...', !!hasComments);
+      
+      if (hasComments) {
+        console.log('[GitHub Comment Editor] Comments detected, setting up event listeners');
+        setupEventListeners();
+      } else {
+        // Keep checking until comments appear
+        setTimeout(checkForComments, 500);
+      }
+    };
+
+    checkForComments();
+  }
+
+  function setupEventListeners() {
+    // Listen for Shift+Enter keypress
+    document.addEventListener('keydown', handleKeyPress, true); // Use capture phase
+
+    // Also log all key events for debugging
+    document.addEventListener('keydown', (event) => {
+      console.log('[GitHub Comment Editor] Key pressed:', {
+        key: event.key,
+        code: event.code,
+        shiftKey: event.shiftKey,
+        metaKey: event.metaKey,
+        ctrlKey: event.ctrlKey,
+        altKey: event.altKey,
+        target: event.target
+      });
+    }, true);
+
+    console.log('[GitHub Comment Editor] Event listeners attached');
+  }
 
   function isGitHubIssuePage(): boolean {
     const url = window.location.href;
@@ -73,68 +103,83 @@
 
   function editCurrentComment(): void {
     console.log('[GitHub Comment Editor] editCurrentComment called');
+
+    // GitHub dynamically loads comments. Look for various containers
+    // 1. First try to find issue comments (user comments)
+    const issueComments = Array.from(document.querySelectorAll('[id^="issuecomment-"]'));
+    console.log('[GitHub Comment Editor] Found issue comments:', issueComments.length);
     
-    // Get all timeline items (comments and the issue/PR description)
-    // GitHub has changed their HTML structure, now using .comment instead of .timeline-comment
-    let allTimelineItems = document.querySelectorAll('.timeline-comment');
-    console.log('[GitHub Comment Editor] Found .timeline-comment items:', allTimelineItems.length);
+    // 2. Find the issue/PR description (the main body)
+    const issueBody = document.querySelector('[data-testid="issue-viewer-container"]') ||
+                     document.querySelector('[class*="IssueBodyViewer"]') ||
+                     document.querySelector('[class*="IssueViewer"]');
     
-    // If old selector doesn't work, try the new one
-    if (allTimelineItems.length === 0) {
-      allTimelineItems = document.querySelectorAll('.comment');
-      console.log('[GitHub Comment Editor] Found .comment items:', allTimelineItems.length);
-      
-      if (allTimelineItems.length === 0) {
-        console.log('[GitHub Comment Editor] No comments found on this page');
-        return;
+    console.log('[GitHub Comment Editor] Found issue body:', !!issueBody);
+
+    // 3. Combine all comment-like elements
+    let allComments: Element[] = [];
+    
+    // Add issue body as first "comment" if it exists and has an edit button
+    if (issueBody) {
+      const hasEditButton = issueBody.querySelector('.octicon-kebab-horizontal') ||
+                          issueBody.querySelector('[aria-label*="options" i]');
+      if (hasEditButton) {
+        allComments.push(issueBody);
+        console.log('[GitHub Comment Editor] Added issue body to comments list');
       }
     }
+    
+    // Add all issue comments
+    allComments = allComments.concat(issueComments);
+    
+    console.log('[GitHub Comment Editor] Total comments (including issue body):', allComments.length);
 
-    // Filter to only get actual comment containers (not code comments or other .comment elements)
-    // Look for comments that have edit buttons/menus
-    const actualComments = Array.from(allTimelineItems).filter(el => {
-      // Check if this looks like an actual comment by looking for action buttons
-      return el.querySelector('button[aria-label*="options" i]') || 
-             el.querySelector('.octicon-kebab-horizontal') ||
-             el.querySelector('button.btn-octicon') ||
-             el.querySelector('[role="button"]');
-    });
-    
-    console.log('[GitHub Comment Editor] Filtered to actual comments:', actualComments.length);
-    
-    if (actualComments.length === 0) {
+    if (allComments.length === 0) {
       console.log('[GitHub Comment Editor] No editable comments found');
+      
+      // Log what we can see on the page for debugging
+      console.log('[GitHub Comment Editor] Kebab buttons on page:', 
+                  document.querySelectorAll('.octicon-kebab-horizontal').length);
+      console.log('[GitHub Comment Editor] Elements with data-testid:', 
+                  document.querySelectorAll('[data-testid]').length);
       return;
     }
-    
+
     // Determine the "current" comment
     // Strategy: Last comment if there are multiple, otherwise the issue description (first item)
     let targetComment: Element;
-    
-    // Check if there's more than one comment
-    if (actualComments.length > 1) {
-      // Get the last actual comment (not the issue description)
-      // The first comment is usually the issue/PR description
-      targetComment = actualComments[actualComments.length - 1];
+
+    if (allComments.length > 1) {
+      // Get the last comment (most recent)
+      targetComment = allComments[allComments.length - 1];
       console.log('[GitHub Comment Editor] Selected last comment as target');
     } else {
       // Only the issue/PR description exists
-      targetComment = actualComments[0];
+      targetComment = allComments[0];
       console.log('[GitHub Comment Editor] Selected issue/PR description as target');
     }
 
     console.log('[GitHub Comment Editor] Target comment element:', targetComment);
+    console.log('[GitHub Comment Editor] Target comment ID:', targetComment.id || 'no-id');
 
     // Find the edit button in the target comment
     const editButton = findEditButton(targetComment);
-    
+
     if (editButton) {
       // Click the edit button
       (editButton as HTMLElement).click();
       console.log('[GitHub Comment Editor] Triggered edit for current comment');
     } else {
       console.log('[GitHub Comment Editor] Could not find edit button for current comment');
-      console.log('[GitHub Comment Editor] Target comment HTML:', targetComment.innerHTML.substring(0, 500));
+      
+      // Try to find any kebab button in the target for debugging
+      const anyKebab = targetComment.querySelector('.octicon-kebab-horizontal');
+      console.log('[GitHub Comment Editor] Any kebab in target:', !!anyKebab);
+      
+      if (anyKebab) {
+        const parentButton = anyKebab.closest('button');
+        console.log('[GitHub Comment Editor] Kebab parent button:', parentButton?.outerHTML.substring(0, 200));
+      }
     }
   }
 
