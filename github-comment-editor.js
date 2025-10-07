@@ -105,33 +105,42 @@
         console.log('[GitHub Comment Editor] Double-click detected on:', event.target);
         // Find the parent comment container from where the user double-clicked
         const target = event.target;
-        // First, look for the closest issue comment
-        let commentContainer = target.closest('[id^="issuecomment-"]');
-        if (commentContainer) {
-            console.log('[GitHub Comment Editor] Found issue comment:', commentContainer.id);
-        }
-        else {
-            // Not in a comment, check if we're in the issue description
-            // The issue description is the first comment-like element but doesn't have an issuecomment ID
-            // Look for various issue body containers
-            const issueBodySelectors = [
-                '[data-testid="issue-body"]',
-                '[data-testid="issue-viewer-container"]',
-                '.js-issue-body',
-                '[class*="IssueBodyViewer"]'
-            ];
-            for (const selector of issueBodySelectors) {
-                const possibleIssueBody = target.closest(selector);
-                if (possibleIssueBody) {
-                    // Make sure we're not actually inside a comment that's within the issue viewer
-                    const containsComment = target.closest('[id^="issuecomment-"]');
-                    if (!containsComment) {
-                        console.log('[GitHub Comment Editor] Found issue body with selector:', selector);
-                        commentContainer = possibleIssueBody;
-                        break;
-                    }
+        // GitHub's DOM structure:
+        // - Comments: <div id="issuecomment-XXX" data-testid="comment-header">
+        // - Issue body: Within [data-testid="issue-viewer-container"] but NOT in an issuecomment
+        let commentContainer = null;
+        // Strategy: Walk up the DOM tree looking for either a comment or the issue body
+        let current = target;
+        let foundIssueViewer = false;
+        while (current && !commentContainer) {
+            // Check if this element is a comment
+            if (current.id && current.id.startsWith('issuecomment-')) {
+                console.log('[GitHub Comment Editor] Found issue comment:', current.id);
+                commentContainer = current;
+                break;
+            }
+            // Check if this is a comment header (sometimes the ID is on a parent)
+            if (current.getAttribute('data-testid') === 'comment-header') {
+                // Look for the issuecomment ID in parents
+                const parentWithId = current.closest('[id^="issuecomment-"]');
+                if (parentWithId) {
+                    console.log('[GitHub Comment Editor] Found issue comment via header:', parentWithId.id);
+                    commentContainer = parentWithId;
+                    break;
                 }
             }
+            // Track if we've seen the issue viewer container
+            if (current.getAttribute('data-testid') === 'issue-viewer-container' ||
+                current.className?.includes('IssueBodyViewer')) {
+                foundIssueViewer = true;
+            }
+            current = current.parentElement;
+        }
+        // If no comment was found but we're inside the issue viewer, treat as issue description
+        if (!commentContainer && foundIssueViewer) {
+            console.log('[GitHub Comment Editor] No comment found, but inside issue viewer - treating as issue description');
+            // Use the issue viewer container as the target
+            commentContainer = document.querySelector('[data-testid="issue-viewer-container"]');
         }
         if (!commentContainer) {
             console.log('[GitHub Comment Editor] Double-click was not inside a comment or issue body');
@@ -282,12 +291,20 @@
             // Click the kebab menu to open it
             kebabButton.click();
             // Use MutationObserver to wait for the menu to appear
+            let menuFound = false;
             const observer = new MutationObserver((mutations, obs) => {
-                // Find the edit button in the dropdown menu
-                const editMenuItem = findEditMenuItem();
-                if (editMenuItem) {
-                    obs.disconnect();
-                    editMenuItem.click();
+                // Only try to find the edit button once
+                if (!menuFound) {
+                    const editMenuItem = findEditMenuItem();
+                    if (editMenuItem) {
+                        menuFound = true;
+                        obs.disconnect();
+                        // Small delay to ensure menu is fully rendered
+                        setTimeout(() => {
+                            editMenuItem.click();
+                            console.log('[GitHub Comment Editor] Clicked Edit menu item');
+                        }, 10);
+                    }
                 }
             });
             // Start observing for menu appearance
@@ -295,24 +312,31 @@
                 childList: true,
                 subtree: true
             });
-            // Set a timeout to stop observing and close menu if edit button not found
+            // Set a timeout to stop observing if menu doesn't appear or edit not found
             const kebabButtonElement = kebabButton;
             setTimeout(() => {
                 observer.disconnect();
-                const editMenuItem = findEditMenuItem();
-                if (!editMenuItem) {
-                    // If we can't find the edit button, try to close the menu
-                    const openDetails = document.querySelector('details[open].js-comment-header-actions-menu');
-                    if (openDetails) {
-                        openDetails.open = false;
+                if (!menuFound) {
+                    // Try one more time directly
+                    const editMenuItem = findEditMenuItem();
+                    if (editMenuItem) {
+                        editMenuItem.click();
+                        console.log('[GitHub Comment Editor] Clicked Edit menu item (from timeout)');
                     }
                     else {
-                        // Try clicking the kebab button again to close it
-                        kebabButtonElement.click();
+                        // If we can't find the edit button, try to close the menu
+                        const openDetails = document.querySelector('details[open].js-comment-header-actions-menu');
+                        if (openDetails) {
+                            openDetails.open = false;
+                        }
+                        else {
+                            // Try clicking the kebab button again to close it
+                            kebabButtonElement.click();
+                        }
+                        console.log('[GitHub Comment Editor] Edit option not found in menu');
                     }
-                    console.log('[GitHub Comment Editor] Edit option not found in menu');
                 }
-            }, 500);
+            }, 300);
             return kebabButton; // Return something truthy to indicate we handled it
         }
         // Fallback: try to find a direct edit button (some older GitHub UI versions)
