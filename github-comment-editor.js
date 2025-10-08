@@ -3,7 +3,6 @@
 // Features:
 // - Shift+Cmd+P: Edit last edited comment (or last comment if none edited yet)
 // - Double-click: Edit specific comment where you clicked
-// - Escape: Cancel editing
 // Maintains state of last edited comment for quick re-editing
 (function () {
     console.log('[GitHub Comment Editor] Script loaded, checking URL...');
@@ -38,7 +37,7 @@
         checkForComments();
     }
     function setupEventListeners() {
-        // Listen for keyboard shortcuts (Shift+Cmd+P and Escape)
+        // Listen for keyboard shortcut (Shift+Cmd+P)
         document.addEventListener('keydown', handleKeyPress, true); // Use capture phase
         // Also log all key events for debugging
         document.addEventListener('keydown', (event) => {
@@ -54,7 +53,7 @@
         }, true);
         // Listen for double-click to edit specific comment
         document.addEventListener('dblclick', handleDoubleClick, true);
-        console.log('[GitHub Comment Editor] Event listeners attached (Shift+Cmd+P, Escape, and double-click)');
+        console.log('[GitHub Comment Editor] Event listeners attached (Shift+Cmd+P and double-click)');
     }
     function isGitHubIssuePage() {
         const url = window.location.href;
@@ -99,22 +98,6 @@
                     console.log('[GitHub Comment Editor] No last edited comment, using current comment');
                 }
                 editCurrentComment();
-            }
-        }
-        // Check for Escape key to cancel editing
-        if (event.key === 'Escape') {
-            console.log('[GitHub Comment Editor] Escape key detected');
-            // Look for a visible Cancel button in any comment edit form
-            const cancelButtons = document.querySelectorAll('button[type="button"]');
-            for (const button of Array.from(cancelButtons)) {
-                const text = button.textContent?.trim().toLowerCase();
-                if (text === 'cancel' && button.offsetParent !== null) {
-                    console.log('[GitHub Comment Editor] Found and clicking Cancel button');
-                    button.click();
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
-                }
             }
         }
     }
