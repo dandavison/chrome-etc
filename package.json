@@ -1,8 +1,18 @@
 {
+  "scripts": {
+    "test": "npm run build && npx ts-node --project tsconfig.test.json test-extension-assertions.ts",
+    "test:screenshots": "npm run build && npx ts-node --project tsconfig.test.json test-extension.ts",
+    "test:dom": "npm run build && npx ts-node --project tsconfig.test.json test-dom-inspector.ts",
+    "build": "tsc"
+  },
   "dependencies": {
     "typescript": "^5.1.6"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.309"
+    "@playwright/test": "^1.57.0",
+    "@types/chrome": "^0.0.309",
+    "@types/node": "^20.0.0",
+    "playwright": "^1.57.0",
+    "ts-node": "^10.9.2"
   }
 }
