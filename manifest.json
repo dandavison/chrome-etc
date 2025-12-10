@@ -9,7 +9,7 @@
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],
-      "js": ["github-comment-editor.js"],
+      "js": ["github-comment-editor.js", "github-fullwidth.js"],
       "run_at": "document_idle"
     }
   ],

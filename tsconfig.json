@@ -7,6 +7,12 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "noEmitOnError": true,
-    "types": ["chrome"]
-  }
+    "types": ["chrome", "node"],
+    "skipLibCheck": true
+  },
+  "exclude": [
+    "test-extension.ts",
+    "test-screenshots",
+    "node_modules"
+  ]
 }
