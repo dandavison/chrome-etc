@@ -174,6 +174,28 @@
         max-width: 100% !important;
       }
 
+      /* Hide the sticky header that appears on scroll */
+      #issue-viewer-sticky-header,
+      .HeaderMetadata-module__stickyContainer--JBJvS,
+      [class*="HeaderMetadata-module__stickyContainer"],
+      .gh-header-sticky,
+      .js-sticky,
+      .sticky-content,
+      [data-target="issue-header.stickyHeader"],
+      .IssueHeader-module__stickyHeader--G3qCl,
+      div[class*="stickyHeader"],
+      .sticky-header,
+      .AppHeader-context-full {
+        display: none !important;
+      }
+
+      /* Also hide the progress bar that sometimes appears with it */
+      .Progress,
+      .js-reading-progress,
+      .reading-progress {
+        display: none !important;
+      }
+
     `;
 
     // Log what we found
