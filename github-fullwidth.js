@@ -73,7 +73,7 @@
         display: none !important;
         visibility: hidden !important;
       }
-      
+
       /* Hide the metadata sidebar container */
       .IssueViewer-module__metadataSidebar--QdJ2b,
       div[class*="metadataSidebar"] {
@@ -81,45 +81,45 @@
         visibility: hidden !important;
         width: 0 !important;
       }
-      
+
       /* Hide the metadata pane */
       .IssueViewer-module__issueViewerMetadataPane--i01ta,
       div[class*="issueViewerMetadataPane"] {
         display: none !important;
       }
-      
+
       /* Expand the main content area */
       .IssueViewer-module__contentAndSidebarWrapper--KA1nM,
       div[class*="contentAndSidebarWrapper"] {
         grid-template-columns: 1fr !important;
         max-width: 100% !important;
       }
-      
+
       /* Expand the content area */
       .IssueViewer-module__contentArea--IpMnd,
       div[class*="contentArea"] {
         max-width: 100% !important;
         width: 100% !important;
       }
-      
+
       /* Expand main containers */
       .IssueViewer-module__mainContainer--PhquW,
       div[class*="mainContainer"] {
         max-width: 100% !important;
         width: 100% !important;
       }
-      
+
       /* Expand the issue body */
       .IssueBodyViewer-module__IssueBody--Zg6Wy,
       div[class*="IssueBody"] {
         max-width: 100% !important;
       }
-      
+
       /* Ensure markdown body expands */
       .markdown-body {
         max-width: 100% !important;
       }
-      
+
       /* Expand containers */
       .container-xl,
       .container-lg,
@@ -128,63 +128,37 @@
         padding-left: 16px !important;
         padding-right: 16px !important;
       }
-      
+
       /* Expand timeline items */
       .timeline-comment-wrapper,
       .timeline-comment,
       .TimelineItem {
         max-width: 100% !important;
       }
-      
+
       /* Hide the old-style Layout sidebar if present */
       .Layout-sidebar {
         display: none !important;
       }
-      
+
       /* Ensure the discussion content takes full width */
       .js-discussion,
       .discussion-timeline {
         max-width: 100% !important;
         width: 100% !important;
       }
-      
+
       /* Hide BorderGrid sidebar cells */
       .BorderGrid-cell[width="296"] {
         display: none !important;
       }
-      
+
       /* Expand BorderGrid main cells */
       .BorderGrid-row > .BorderGrid-cell:first-child:not([width="296"]) {
         width: 100% !important;
         max-width: 100% !important;
       }
-      
-      /* Visual indicator */
-      body::before {
-        content: "Full Width Mode Active (Cmd/Ctrl+Shift+W to toggle)";
-        position: fixed;
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(13, 17, 23, 0.95);
-        color: #58a6ff;
-        padding: 6px 16px;
-        font-size: 12px;
-        font-weight: 500;
-        border-radius: 0 0 8px 8px;
-        z-index: 10000;
-        pointer-events: none;
-        opacity: 0;
-        animation: fadeInOut 3s ease-in-out;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-      }
 
-      @keyframes fadeInOut {
-        0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-        20% { opacity: 1; transform: translateX(-50%) translateY(0); }
-        80% { opacity: 1; transform: translateX(-50%) translateY(0); }
-        100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-      }
     `;
         // Log what we found
         const sidebar = document.querySelector('[data-testid="sticky-sidebar"]');

@@ -174,32 +174,6 @@
         max-width: 100% !important;
       }
 
-      /* Visual indicator */
-      body::before {
-        content: "Full Width Mode Active (Cmd/Ctrl+Shift+W to toggle)";
-        position: fixed;
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(13, 17, 23, 0.95);
-        color: #58a6ff;
-        padding: 6px 16px;
-        font-size: 12px;
-        font-weight: 500;
-        border-radius: 0 0 8px 8px;
-        z-index: 10000;
-        pointer-events: none;
-        opacity: 0;
-        animation: fadeInOut 3s ease-in-out;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-      }
-
-      @keyframes fadeInOut {
-        0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-        20% { opacity: 1; transform: translateX(-50%) translateY(0); }
-        80% { opacity: 1; transform: translateX(-50%) translateY(0); }
-        100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-      }
     `;
 
     // Log what we found
