@@ -4,7 +4,7 @@
  */
 
 (function() {
-  console.log('[GitHub Mermaid Cleaner] Script loaded');
+  console.log('[GitHub Mermaid Cleaner] Script loaded on', window.location.hostname);
 
   // Function to inject styles
   function hideMermaidControls(): void {
@@ -15,53 +15,53 @@
       document.head.appendChild(styleEl);
     }
 
-    styleEl.innerHTML = `
-      /* Hide the entire control panel in the bottom-right of Mermaid diagrams */
-      .mermaid-viewer-control-panel {
-        display: none !important;
-      }
-      
-      /* Hide fullscreen/expand controls */
-      button[aria-label*="fullscreen" i],
-      button[aria-label*="expand" i],
-      button[title*="fullscreen" i],
-      button[title*="expand" i],
-      .fullscreen-button,
-      .expand-button {
-        display: none !important;
-      }
-      
-      /* Hide copy controls */
-      button[aria-label*="copy" i],
-      button[title*="copy" i],
-      .copy-button,
-      clipboard-copy {
-        display: none !important;
-      }
-      
-      /* Hide any floating button groups on diagrams */
-      .btn-group,
-      .BtnGroup,
-      .button-group {
-        display: none !important;
-      }
-      
-      /* For viewscreen.githubusercontent.com context - hide all buttons */
-      ${window.location.hostname === 'viewscreen.githubusercontent.com' ? `
+    // Different CSS based on context
+    if (window.location.hostname === 'viewscreen.githubusercontent.com') {
+      // Inside the iframe - hide bottom-right controls
+      styleEl.innerHTML = `
+        /* Hide the entire control panel in the bottom-right of Mermaid diagrams */
+        .mermaid-viewer-control-panel {
+          display: none !important;
+        }
+
+        /* Hide all buttons in the iframe */
         button {
           display: none !important;
         }
-      ` : ''}
-      
-      /* For GitHub main page - hide render viewer action buttons */
-      .render-viewer-actions,
-      .js-render-enrichment-buttons,
-      .render-needs-enrichment .position-absolute button {
-        display: none !important;
-      }
-      
-      /* This removes ALL control overlays from Mermaid diagrams */
-    `;
+      `;
+    } else {
+      // On main GitHub page - hide overlay controls
+      styleEl.innerHTML = `
+        /* Hide the overlay expand/fullscreen buttons on Mermaid containers */
+        .js-render-needs-enrichment button[aria-label*="fullscreen" i],
+        .render-needs-enrichment button[aria-label*="fullscreen" i],
+        section[data-type="mermaid"] button {
+          display: none !important;
+        }
+
+        /* Hide the copy button */
+        clipboard-copy[aria-label*="Copy" i] {
+          display: none !important;
+        }
+
+        /* Hide any button that's a sibling of the iframe */
+        iframe.render-viewer ~ button,
+        iframe.render-viewer ~ * button {
+          display: none !important;
+        }
+
+        /* Hide buttons inside the render container */
+        .render-container button,
+        .js-render-target button {
+          display: none !important;
+        }
+
+        /* Hide the entire button group that appears over mermaid */
+        .position-absolute:has(button[aria-label*="fullscreen" i]) {
+          display: none !important;
+        }
+      `;
+    }
   }
 
   // Apply the styles immediately
