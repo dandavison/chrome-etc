@@ -20,9 +20,22 @@
       .mermaid-viewer-control-panel {
         display: none !important;
       }
-
-      /* This removes all controls: pan (arrows), zoom (in/out), and reset/sync buttons */
-      /* The upper-right controls (arrows to expand, copy button) remain visible */
+      
+      /* Hide the upper-right controls (expand arrows, copy button) on Mermaid containers */
+      .js-render-needs-enrichment .position-absolute button,
+      .render-container button[aria-label*="expand"],
+      .render-container button[aria-label*="copy"],
+      .render-container .BtnGroup,
+      .js-render-enrichment-buttons,
+      button[aria-label="Enter fullscreen"],
+      button[aria-label="Exit fullscreen"],
+      button[aria-label="Copy mermaid code"],
+      .render-viewer-actions,
+      .render-needs-enrichment button {
+        display: none !important;
+      }
+      
+      /* This removes ALL controls from Mermaid diagrams for a clean viewing experience */
     `;
   }
 

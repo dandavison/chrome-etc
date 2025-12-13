@@ -28,10 +28,21 @@ async function testMermaidWithIframe() {
   const mainPageCheck = await page.evaluate(() => {
     const styleEl = document.getElementById('github-mermaid-cleaner-styles');
     const iframe = document.querySelector('iframe.render-viewer');
+    const upperRightButtons = document.querySelectorAll(
+      'button[aria-label*="expand"], button[aria-label*="copy"], .render-viewer-actions button'
+    );
     return {
       styleInjected: !!styleEl,
       iframePresent: !!iframe,
-      iframeSrc: iframe ? (iframe as HTMLIFrameElement).src : null
+      iframeSrc: iframe ? (iframe as HTMLIFrameElement).src : null,
+      upperRightButtonCount: upperRightButtons.length,
+      upperRightButtonsHidden: Array.from(upperRightButtons).map(btn => {
+        const style = window.getComputedStyle(btn);
+        return {
+          ariaLabel: btn.getAttribute('aria-label'),
+          hidden: style.display === 'none'
+        };
+      })
     };
   });
 
@@ -40,6 +51,13 @@ async function testMermaidWithIframe() {
   console.log(`  ✓ Mermaid iframe present: ${mainPageCheck.iframePresent}`);
   if (mainPageCheck.iframeSrc) {
     console.log(`  ✓ Iframe source: ${mainPageCheck.iframeSrc.substring(0, 80)}...`);
+  }
+  
+  console.log(`\n  Upper-right controls: ${mainPageCheck.upperRightButtonCount} found`);
+  if (mainPageCheck.upperRightButtonsHidden.length > 0) {
+    mainPageCheck.upperRightButtonsHidden.forEach((btn: any) => {
+      console.log(`    - ${btn.ariaLabel}: ${btn.hidden ? '✓ Hidden' : '✗ Visible'}`);
+    });
   }
 
   // Now we need to navigate directly to the iframe URL to test if our styles work there
