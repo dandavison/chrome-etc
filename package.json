@@ -3,6 +3,7 @@
     "test": "npm run build && npx ts-node --project tsconfig.test.json test-extension-assertions.ts",
     "test:screenshots": "npm run build && npx ts-node --project tsconfig.test.json test-extension.ts",
     "test:dom": "npm run build && npx ts-node --project tsconfig.test.json test-dom-inspector.ts",
+    "test:mermaid": "npm run build && npx ts-node --project tsconfig.test.json test-mermaid-iframe.ts",
     "build": "tsc"
   },
   "dependencies": {
