@@ -21,7 +21,7 @@
         .mermaid-viewer-control-panel {
           display: none !important;
         }
-        
+
         /* Hide all buttons in the iframe */
         button {
           display: none !important;
@@ -37,24 +37,24 @@
         section[data-type="mermaid"] button {
           display: none !important;
         }
-        
+
         /* Hide the copy button */
         clipboard-copy[aria-label*="Copy" i] {
           display: none !important;
         }
-        
+
         /* Hide any button that's a sibling of the iframe */
         iframe.render-viewer ~ button,
         iframe.render-viewer ~ * button {
           display: none !important;
         }
-        
+
         /* Hide buttons inside the render container */
         .render-container button,
         .js-render-target button {
           display: none !important;
         }
-        
+
         /* Hide the entire button group that appears over mermaid */
         .position-absolute:has(button[aria-label*="fullscreen" i]) {
           display: none !important;
