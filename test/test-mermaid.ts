@@ -123,7 +123,7 @@ async function testMermaidControlsProperly() {
   // STEP 2: Now test WITH the extension
   console.log('\n\n=== PHASE 2: TEST WITH EXTENSION ===');
 
-  const extensionPath = path.resolve(__dirname);
+  const extensionPath = path.resolve(__dirname, '..', 'dist');
   const browserWithExt = await chromium.launchPersistentContext('', {
     headless: false,
     args: [

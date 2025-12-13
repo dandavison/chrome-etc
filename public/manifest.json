@@ -4,23 +4,31 @@
   "description": "Chrome extension for anything",
   "version": "0.1",
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background/background.js"
   },
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],
-      "js": ["github-comment-editor.js", "github-fullwidth.js", "github-mermaid-cleaner.js"],
+      "js": [
+        "content/github-comment-editor.js",
+        "content/github-fullwidth.js",
+        "content/github-mermaid-cleaner.js"
+      ],
       "run_at": "document_idle"
     },
     {
       "matches": ["https://viewscreen.githubusercontent.com/*"],
-      "js": ["github-mermaid-cleaner.js"],
+      "js": ["content/github-mermaid-cleaner.js"],
       "run_at": "document_idle",
       "all_frames": true
     }
   ],
   "permissions": ["scripting", "activeTab", "webNavigation", "tabs"],
-  "host_permissions": ["http://wormhole:7117/*", "https://temporaltechnologies.slack.com/*", "https://temporalio.slack.com/*"],
+  "host_permissions": [
+    "http://wormhole:7117/*",
+    "https://temporaltechnologies.slack.com/*",
+    "https://temporalio.slack.com/*"
+  ],
   "commands": {
     "_execute_action": {
       "suggested_key": {

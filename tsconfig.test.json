@@ -1,11 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": ["node"],
-    "skipLibCheck": true
+    "rootDir": "./",
+    "outDir": "./dist-test",
+    "types": ["chrome", "node"]
   },
-  "include": [
-    "test-extension.ts"
-  ],
-  "exclude": []
+  "include": ["test/**/*", "src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

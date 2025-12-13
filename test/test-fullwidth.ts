@@ -116,7 +116,10 @@ async function testFullWidthToggle(context: BrowserContext, issueUrl: string, is
 
 async function runTests() {
   console.log('🚀 Starting Chrome Extension Tests\n');
-  console.log('📁 Extension path:', __dirname);
+  
+  // Extension is built in the dist directory
+  const extensionPath = path.join(__dirname, '..', 'dist');
+  console.log('📁 Extension path:', extensionPath);
   
   await ensureScreenshotsDir();
   
@@ -126,8 +129,8 @@ async function runTests() {
   const context = await chromium.launchPersistentContext('', {
     headless: false, // We want to see what's happening
     args: [
-      `--disable-extensions-except=${__dirname}`,
-      `--load-extension=${__dirname}`,
+      `--disable-extensions-except=${extensionPath}`,
+      `--load-extension=${extensionPath}`,
       '--no-sandbox',
     ],
     viewport: { width: 1920, height: 1080 },
