@@ -55,37 +55,30 @@ async function testMermaidWithIframe() {
     const iframeCheck = await iframePage.evaluate(() => {
       const styleEl = document.getElementById('github-mermaid-cleaner-styles');
       const controlPanel = document.querySelector('.mermaid-viewer-control-panel');
-      const panButtons = document.querySelectorAll('.mermaid-viewer-control-panel button.up, .mermaid-viewer-control-panel button.down, .mermaid-viewer-control-panel button.left, .mermaid-viewer-control-panel button.right');
-      const zoomButtons = document.querySelectorAll('.mermaid-viewer-control-panel button.zoom-in, .mermaid-viewer-control-panel button.zoom-out, .mermaid-viewer-control-panel button.reset');
+      const allButtons = controlPanel ? controlPanel.querySelectorAll('button') : [];
 
       const results: any = {
         styleInjected: !!styleEl,
         controlPanelPresent: !!controlPanel,
-        panButtonCount: panButtons.length,
-        zoomButtonCount: zoomButtons.length,
-        panButtonsHidden: [],
-        zoomButtonsVisible: []
+        controlPanelHidden: false,
+        totalButtonsInPanel: allButtons.length,
+        buttonDetails: []
       };
 
-      // Check visibility of pan buttons
-      panButtons.forEach(btn => {
-        const style = window.getComputedStyle(btn);
-        results.panButtonsHidden.push({
-          class: btn.className,
-          display: style.display,
-          hidden: style.display === 'none'
-        });
-      });
+      // Check if entire control panel is hidden
+      if (controlPanel) {
+        const style = window.getComputedStyle(controlPanel);
+        results.controlPanelHidden = style.display === 'none';
+        results.controlPanelDisplay = style.display;
 
-      // Check visibility of zoom buttons
-      zoomButtons.forEach(btn => {
-        const style = window.getComputedStyle(btn);
-        results.zoomButtonsVisible.push({
-          class: btn.className,
-          display: style.display,
-          visible: style.display !== 'none'
+        // Get details of all buttons (even if panel is hidden)
+        allButtons.forEach(btn => {
+          results.buttonDetails.push({
+            ariaLabel: btn.getAttribute('aria-label'),
+            className: btn.className
+          });
         });
-      });
+      }
 
       return results;
     });
@@ -93,21 +86,21 @@ async function testMermaidWithIframe() {
     console.log('Iframe content:');
     console.log(`  Style injected: ${iframeCheck.styleInjected ? '✓' : '✗'}`);
     console.log(`  Control panel found: ${iframeCheck.controlPanelPresent ? '✓' : '✗'}`);
-    console.log(`  Pan buttons found: ${iframeCheck.panButtonCount}`);
-    console.log(`  Zoom buttons found: ${iframeCheck.zoomButtonCount}`);
+    console.log(`  Control panel hidden: ${iframeCheck.controlPanelHidden ? '✓' : '✗'} (display: ${iframeCheck.controlPanelDisplay || 'N/A'})`);
+    console.log(`  Total buttons in panel: ${iframeCheck.totalButtonsInPanel}`);
 
-    if (iframeCheck.panButtonsHidden.length > 0) {
-      console.log('\n  Pan button visibility:');
-      iframeCheck.panButtonsHidden.forEach((btn: any, i: number) => {
-        console.log(`    Button ${i + 1}: ${btn.hidden ? '✓ Hidden' : '✗ Visible'} (${btn.display})`);
+    if (iframeCheck.buttonDetails.length > 0) {
+      console.log('\n  Buttons in control panel (all hidden):');
+      iframeCheck.buttonDetails.forEach((btn: any, i: number) => {
+        console.log(`    ${i + 1}. ${btn.ariaLabel || btn.className}`);
       });
     }
 
-    if (iframeCheck.zoomButtonsVisible.length > 0) {
-      console.log('\n  Zoom button visibility:');
-      iframeCheck.zoomButtonsVisible.forEach((btn: any, i: number) => {
-        console.log(`    Button ${i + 1}: ${btn.visible ? '✓ Visible' : '✗ Hidden'} (${btn.display})`);
-      });
+    // Success check
+    if (iframeCheck.styleInjected && iframeCheck.controlPanelHidden) {
+      console.log('\n✅ SUCCESS: Entire control panel is hidden!');
+    } else if (!iframeCheck.controlPanelHidden) {
+      console.log('\n⚠️  WARNING: Control panel is still visible');
     }
 
     // Take screenshot of the iframe page

@@ -14,16 +14,13 @@
             document.head.appendChild(styleEl);
         }
         styleEl.innerHTML = `
-      /* Hide only the pan controls (up/down/left/right) from Mermaid diagrams */
-      .mermaid-viewer-control-panel button.up,
-      .mermaid-viewer-control-panel button.down,
-      .mermaid-viewer-control-panel button.left,
-      .mermaid-viewer-control-panel button.right {
+      /* Hide the entire control panel in the bottom-right of Mermaid diagrams */
+      .mermaid-viewer-control-panel {
         display: none !important;
       }
       
-      /* Keep the zoom and reset controls visible but hide the pan controls */
-      /* This removes the annoying directional controls in the bottom right */
+      /* This removes all controls: pan (arrows), zoom (in/out), and reset/sync buttons */
+      /* The upper-right controls (arrows to expand, copy button) remain visible */
     `;
     }
     // Apply the styles immediately
