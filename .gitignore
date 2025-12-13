@@ -1,25 +1,15 @@
-# Node modules
 node_modules/
-
-# Build artifacts
 *.js.map
 
 # Test artifacts
+test-*.js
+test-*.js.map
+test-report.json
+test-report.md
 test-screenshots/
 width-modes-screenshots/
 dom-analysis/
-test-report.json
-test-report.md
+*.png
 
-# macOS
-.DS_Store
-
-# IDE
-.idea/
-.vscode/
-
-# Logs
-*.log
-
-# Temporary files
-*.tmp
+# Keep the actual test TypeScript files
+!test-*.ts
