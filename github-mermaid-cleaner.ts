@@ -21,21 +21,46 @@
         display: none !important;
       }
       
-      /* Hide the upper-right controls (expand arrows, copy button) on Mermaid containers */
-      .js-render-needs-enrichment .position-absolute button,
-      .render-container button[aria-label*="expand"],
-      .render-container button[aria-label*="copy"],
-      .render-container .BtnGroup,
-      .js-render-enrichment-buttons,
-      button[aria-label="Enter fullscreen"],
-      button[aria-label="Exit fullscreen"],
-      button[aria-label="Copy mermaid code"],
-      .render-viewer-actions,
-      .render-needs-enrichment button {
+      /* Hide fullscreen/expand controls */
+      button[aria-label*="fullscreen" i],
+      button[aria-label*="expand" i],
+      button[title*="fullscreen" i],
+      button[title*="expand" i],
+      .fullscreen-button,
+      .expand-button {
         display: none !important;
       }
       
-      /* This removes ALL controls from Mermaid diagrams for a clean viewing experience */
+      /* Hide copy controls */
+      button[aria-label*="copy" i],
+      button[title*="copy" i],
+      .copy-button,
+      clipboard-copy {
+        display: none !important;
+      }
+      
+      /* Hide any floating button groups on diagrams */
+      .btn-group,
+      .BtnGroup,
+      .button-group {
+        display: none !important;
+      }
+      
+      /* For viewscreen.githubusercontent.com context - hide all buttons */
+      ${window.location.hostname === 'viewscreen.githubusercontent.com' ? `
+        button {
+          display: none !important;
+        }
+      ` : ''}
+      
+      /* For GitHub main page - hide render viewer action buttons */
+      .render-viewer-actions,
+      .js-render-enrichment-buttons,
+      .render-needs-enrichment .position-absolute button {
+        display: none !important;
+      }
+      
+      /* This removes ALL control overlays from Mermaid diagrams */
     `;
   }
 

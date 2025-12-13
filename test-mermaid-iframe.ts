@@ -52,7 +52,7 @@ async function testMermaidWithIframe() {
   if (mainPageCheck.iframeSrc) {
     console.log(`  ✓ Iframe source: ${mainPageCheck.iframeSrc.substring(0, 80)}...`);
   }
-  
+
   console.log(`\n  Upper-right controls: ${mainPageCheck.upperRightButtonCount} found`);
   if (mainPageCheck.upperRightButtonsHidden.length > 0) {
     mainPageCheck.upperRightButtonsHidden.forEach((btn: any) => {
