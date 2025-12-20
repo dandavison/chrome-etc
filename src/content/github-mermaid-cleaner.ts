@@ -39,25 +39,27 @@
           display: none !important;
         }
 
-        /* Hide the copy button */
-        clipboard-copy[aria-label*="Copy" i] {
+        /* Hide copy buttons ONLY within Mermaid diagram containers */
+        section[data-type="mermaid"] clipboard-copy[aria-label*="Copy" i],
+        .js-render-needs-enrichment clipboard-copy[aria-label*="Copy" i],
+        .render-needs-enrichment clipboard-copy[aria-label*="Copy" i] {
           display: none !important;
         }
 
-        /* Hide any button that's a sibling of the iframe */
-        iframe.render-viewer ~ button,
-        iframe.render-viewer ~ * button {
+        /* Hide buttons that are siblings of Mermaid iframe viewers ONLY */
+        section[data-type="mermaid"] iframe.render-viewer ~ button,
+        section[data-type="mermaid"] iframe.render-viewer ~ * button {
           display: none !important;
         }
 
-        /* Hide buttons inside the render container */
-        .render-container button,
-        .js-render-target button {
+        /* Hide buttons inside Mermaid render containers ONLY */
+        section[data-type="mermaid"] .render-container button,
+        section[data-type="mermaid"] .js-render-target button {
           display: none !important;
         }
 
-        /* Hide the entire button group that appears over mermaid */
-        .position-absolute:has(button[aria-label*="fullscreen" i]) {
+        /* Hide the button group over Mermaid diagrams specifically */
+        section[data-type="mermaid"] .position-absolute:has(button[aria-label*="fullscreen" i]) {
           display: none !important;
         }
       `;

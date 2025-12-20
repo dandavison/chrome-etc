@@ -5,6 +5,7 @@
     "test:dom": "npm run build && npx ts-node --project tsconfig.test.json test-dom-inspector.ts",
     "test:comment-editor": "npm run build && npx ts-node --project tsconfig.test.json test/test-comment-editor.ts",
     "test:comment-unit": "npx ts-node --project tsconfig.test.json test/test-comment-editor-unit.ts",
+    "test:mermaid-unit": "npx ts-node --project tsconfig.test.json test/test-mermaid-cleaner-unit.ts",
     "build": "tsc"
   },
   "dependencies": {
