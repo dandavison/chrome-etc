@@ -7,9 +7,10 @@
     "build": "npm run clean && tsc && npm run copy-static",
     "copy-static": "cp public/manifest.json dist/",
     "watch": "tsc --watch",
-    "test": "npm run test:fullwidth && npm run test:mermaid",
+    "test": "npm run test:fullwidth && npm run test:mermaid && npm run test:comment-fold",
     "test:fullwidth": "npm run build && npx ts-node --project tsconfig.test.json test/test-fullwidth.ts",
     "test:mermaid": "npm run build && npx ts-node --project tsconfig.test.json test/test-mermaid.ts",
+    "test:comment-fold": "npx ts-node --project tsconfig.test.json test/test-comment-fold-unit.ts",
     "package": "npm run build && cd dist && zip -r ../extension.zip *"
   },
   "dependencies": {
