@@ -3,6 +3,8 @@
     "test": "npm run build && npx ts-node --project tsconfig.test.json test-extension-assertions.ts",
     "test:screenshots": "npm run build && npx ts-node --project tsconfig.test.json test-extension.ts",
     "test:dom": "npm run build && npx ts-node --project tsconfig.test.json test-dom-inspector.ts",
+    "test:comment-editor": "npm run build && npx ts-node --project tsconfig.test.json test/test-comment-editor.ts",
+    "test:comment-unit": "npx ts-node --project tsconfig.test.json test/test-comment-editor-unit.ts",
     "build": "tsc"
   },
   "dependencies": {
@@ -11,7 +13,9 @@
   "devDependencies": {
     "@playwright/test": "^1.57.0",
     "@types/chrome": "^0.0.309",
+    "@types/jsdom": "^27.0.0",
     "@types/node": "^20.0.0",
+    "jsdom": "^27.3.0",
     "playwright": "^1.57.0",
     "ts-node": "^10.9.2"
   }

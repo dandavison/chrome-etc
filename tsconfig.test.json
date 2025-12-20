@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "module": "commonjs",
+    "target": "es2020",
+    "lib": ["es2020", "dom"],
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "noEmitOnError": true,
+    "types": ["node"],
+    "skipLibCheck": true,
+    "outDir": "./test",
+    "rootDir": "./test"
+  },
+  "include": [
+    "test/**/*.ts"
+  ]
+}
