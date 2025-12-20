@@ -17,7 +17,7 @@ function createMockDOM() {
         <pre><code>console.log("regular code");</code></pre>
         <clipboard-copy aria-label="Copy code" class="copy-button">Copy</clipboard-copy>
       </div>
-      
+
       <!-- Another regular code block (should NOT be hidden) -->
       <div class="markdown-body">
         <div class="highlight">
@@ -25,7 +25,7 @@ function createMockDOM() {
           <clipboard-copy aria-label="Copy" data-copy-text="function test() { return true; }">Copy</clipboard-copy>
         </div>
       </div>
-      
+
       <!-- Mermaid diagram section (controls SHOULD be hidden) -->
       <section data-type="mermaid">
         <div class="render-container">
@@ -34,7 +34,7 @@ function createMockDOM() {
           <clipboard-copy aria-label="Copy diagram">Copy</clipboard-copy>
         </div>
       </section>
-      
+
       <!-- Another Mermaid diagram (controls SHOULD be hidden) -->
       <div class="js-render-needs-enrichment">
         <button aria-label="View fullscreen">Expand</button>

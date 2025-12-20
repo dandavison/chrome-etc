@@ -8,11 +8,16 @@
     "sourceMap": true,
     "noEmitOnError": true,
     "types": ["chrome", "node"],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "outDir": "./dist",
+    "rootDir": "./src"
   },
+  "include": [
+    "src/**/*"
+  ],
   "exclude": [
-    "test-extension.ts",
-    "test-screenshots",
-    "node_modules"
+    "node_modules",
+    "test/**/*",
+    "dist/**/*"
   ]
 }

@@ -17,7 +17,7 @@ function createMockDOM() {
         <pre><code>console.log("regular code");</code></pre>
         <clipboard-copy aria-label="Copy code" class="copy-button">Copy</clipboard-copy>
       </div>
-      
+
       <!-- Another regular code block (should NOT be hidden) -->
       <div class="markdown-body">
         <div class="highlight">
@@ -25,7 +25,7 @@ function createMockDOM() {
           <clipboard-copy aria-label="Copy" data-copy-text="function test() { return true; }">Copy</clipboard-copy>
         </div>
       </div>
-      
+
       <!-- Mermaid diagram section (controls SHOULD be hidden) -->
       <section data-type="mermaid">
         <div class="render-container">
@@ -34,7 +34,7 @@ function createMockDOM() {
           <clipboard-copy aria-label="Copy diagram">Copy</clipboard-copy>
         </div>
       </section>
-      
+
       <!-- Another Mermaid diagram (controls SHOULD be hidden) -->
       <div class="js-render-needs-enrichment">
         <button aria-label="View fullscreen">Expand</button>
@@ -43,7 +43,7 @@ function createMockDOM() {
     </body>
     </html>
   `);
-  
+
   return dom;
 }
 
@@ -51,7 +51,7 @@ function createMockDOM() {
 function applyMermaidCleanerStyles(document: Document, useFix: boolean = true): void {
   const styleEl = document.createElement('style');
   styleEl.id = 'github-mermaid-cleaner-styles';
-  
+
   if (useFix) {
     // This is the FIXED implementation
     styleEl.innerHTML = `
@@ -119,7 +119,7 @@ function applyMermaidCleanerStyles(document: Document, useFix: boolean = true): 
       }
     `;
   }
-  
+
   document.head.appendChild(styleEl);
 }
 
@@ -132,21 +132,21 @@ function isVisible(element: Element, window: any): boolean {
 // Run tests
 function runTests(useFix: boolean = true) {
   console.log(`🧪 Running Mermaid Cleaner Unit Tests (${useFix ? 'WITH FIX' : 'WITHOUT FIX - SHOULD FAIL'})\n`);
-  
+
   const dom = createMockDOM();
   const document = dom.window.document;
-  
+
   // Apply the mermaid cleaner styles
   applyMermaidCleanerStyles(document, useFix);
-  
+
   let passed = 0;
   let failed = 0;
-  
+
   // Test 1: Regular code block copy buttons should be VISIBLE
   {
     const regularCopyButtons = document.querySelectorAll('.highlight clipboard-copy, .markdown-body clipboard-copy');
     console.log(`Found ${regularCopyButtons.length} regular code block copy buttons`);
-    
+
     let allVisible = true;
     regularCopyButtons.forEach((button, index) => {
       const visible = isVisible(button, dom.window);
@@ -155,7 +155,7 @@ function runTests(useFix: boolean = true) {
         console.error(`  ❌ Regular copy button ${index + 1} is hidden (should be visible)`);
       }
     });
-    
+
     if (allVisible && regularCopyButtons.length > 0) {
       console.log('✅ Test 1 PASSED: Regular code block copy buttons are visible');
       passed++;
@@ -164,12 +164,12 @@ function runTests(useFix: boolean = true) {
       failed++;
     }
   }
-  
+
   // Test 2: Mermaid diagram copy buttons SHOULD be hidden
   {
     const mermaidCopyButtons = document.querySelectorAll('section[data-type="mermaid"] clipboard-copy, .js-render-needs-enrichment clipboard-copy');
     console.log(`Found ${mermaidCopyButtons.length} mermaid copy buttons`);
-    
+
     let allHidden = true;
     mermaidCopyButtons.forEach((button, index) => {
       const visible = isVisible(button, dom.window);
@@ -178,7 +178,7 @@ function runTests(useFix: boolean = true) {
         console.error(`  ❌ Mermaid copy button ${index + 1} is visible (should be hidden)`);
       }
     });
-    
+
     if (allHidden && mermaidCopyButtons.length > 0) {
       console.log('✅ Test 2 PASSED: Mermaid copy buttons are hidden');
       passed++;
@@ -187,12 +187,12 @@ function runTests(useFix: boolean = true) {
       failed++;
     }
   }
-  
+
   // Test 3: Mermaid fullscreen buttons SHOULD be hidden
   {
     const mermaidFullscreenButtons = document.querySelectorAll('section[data-type="mermaid"] button[aria-label*="fullscreen" i], .js-render-needs-enrichment button[aria-label*="fullscreen" i]');
     console.log(`Found ${mermaidFullscreenButtons.length} mermaid fullscreen buttons`);
-    
+
     let allHidden = true;
     mermaidFullscreenButtons.forEach((button, index) => {
       const visible = isVisible(button, dom.window);
@@ -201,7 +201,7 @@ function runTests(useFix: boolean = true) {
         console.error(`  ❌ Mermaid fullscreen button ${index + 1} is visible (should be hidden)`);
       }
     });
-    
+
     if (allHidden && mermaidFullscreenButtons.length > 0) {
       console.log('✅ Test 3 PASSED: Mermaid fullscreen buttons are hidden');
       passed++;
@@ -212,13 +212,13 @@ function runTests(useFix: boolean = true) {
       failed++;
     }
   }
-  
+
   // Summary
   console.log('\n📊 Test Summary:');
   console.log(`  ✅ Passed: ${passed}`);
   console.log(`  ❌ Failed: ${failed}`);
   console.log(`  📈 Total: ${passed + failed}`);
-  
+
   if (failed > 0) {
     if (!useFix) {
       console.error('\n❌ Tests FAILED as expected! The mermaid-cleaner is hiding regular copy buttons!');
@@ -246,17 +246,17 @@ if (args.includes('--both')) {
   console.log('='.repeat(60));
   console.log('FIRST: Testing WITHOUT the fix (should fail)...');
   console.log('='.repeat(60));
-  
+
   try {
     runTests(false);
   } catch (e) {
     // Expected to fail
   }
-  
+
   console.log('\n' + '='.repeat(60));
   console.log('SECOND: Testing WITH the fix (should pass)...');
   console.log('='.repeat(60));
-  
+
   runTests(true);
 } else {
   runTests(testWithFix);
