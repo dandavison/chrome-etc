@@ -69,7 +69,7 @@ function createMockDOM() {
 // (mirrors the actual implementation in github-comment-fold.ts)
 // ============================================================================
 
-const FOLD_MAX_HEIGHT = '6em';
+const FOLD_MAX_HEIGHT = '1.6em'; // Just the heading/first line - concertina style
 const FOLD_BUTTON_BOTTOM_OFFSET = 72;
 
 function initCommentFold(document: Document): void {
@@ -105,7 +105,7 @@ function applyFold(document: Document): void {
 function removeFold(document: Document): void {
   // Remove class from body
   document.body.classList.remove('github-comments-folded');
-  
+
   const styleEl = document.getElementById('github-comment-fold-styles');
   if (styleEl) {
     styleEl.remove();
@@ -209,7 +209,7 @@ function runTests() {
   {
     console.log('Test 1: Toggle button should exist');
     const result = checkFoldFunctionality(document);
-    
+
     if (result.toggleButtonExists) {
       console.log('✅ Test 1 PASSED: Toggle button exists');
       passed++;
@@ -223,7 +223,7 @@ function runTests() {
   {
     console.log('Test 2: Comments should not be folded initially');
     const result = checkFoldFunctionality(document);
-    
+
     if (!result.isFolded) {
       console.log('✅ Test 2 PASSED: Comments are not folded initially');
       passed++;
@@ -238,7 +238,7 @@ function runTests() {
     console.log('Test 3: After toggle, comments should be folded');
     simulateFoldToggle(document);
     const result = checkFoldFunctionality(document);
-    
+
     if (result.isFolded && result.foldStylesApplied) {
       console.log('✅ Test 3 PASSED: Comments are folded after toggle');
       passed++;
@@ -254,7 +254,7 @@ function runTests() {
     console.log('Test 4: After second toggle, comments should be unfolded');
     simulateFoldToggle(document);
     const result = checkFoldFunctionality(document);
-    
+
     if (!result.isFolded && !result.foldStylesApplied) {
       console.log('✅ Test 4 PASSED: Comments are unfolded after second toggle');
       passed++;

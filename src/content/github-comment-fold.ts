@@ -7,9 +7,9 @@
 
   // State to track whether fold mode is enabled
   let isFolded = localStorage.getItem('github-comment-fold-enabled') === 'true';
-  
+
   // Configuration
-  const FOLD_MAX_HEIGHT = '6em'; // Approximately 3-4 lines
+  const FOLD_MAX_HEIGHT = '1.6em'; // Just the heading/first line - concertina style
   const FOLD_BUTTON_BOTTOM_OFFSET = 72; // Position above the fullwidth button
 
   // Only run on GitHub issue/PR pages
@@ -96,7 +96,7 @@
         position: relative !important;
       }
 
-      /* Add a gradient fade effect at the bottom */
+      /* Add a subtle gradient fade effect at the bottom */
       body.github-comments-folded .comment-body.markdown-body::after,
       body.github-comments-folded .js-comment-body::after,
       body.github-comments-folded [data-testid="issue-body"] .markdown-body::after,
@@ -107,7 +107,7 @@
         bottom: 0;
         left: 0;
         right: 0;
-        height: 2em;
+        height: 0.8em;
         background: linear-gradient(transparent, var(--bgColor-default, #ffffff));
         pointer-events: none;
       }
@@ -138,10 +138,10 @@
 
   function removeFold(): void {
     console.log('[GitHub Comment Fold] Removing fold styles...');
-    
+
     // Remove class from body
     document.body.classList.remove('github-comments-folded');
-    
+
     const styleEl = document.getElementById('github-comment-fold-styles');
     if (styleEl) {
       styleEl.remove();
