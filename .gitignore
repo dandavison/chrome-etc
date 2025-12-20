@@ -1,25 +1,25 @@
+# Node modules
 node_modules/
-dist/
-dist-test/
-*.log
-.DS_Store
-test-screenshots/
-coverage/
-.env
+
+# Build artifacts
 *.js.map
 
 # Test artifacts
+test-screenshots/
+width-modes-screenshots/
+dom-analysis/
 test-report.json
 test-report.md
-dom-analysis/
-*.png
 
-# Extension package
-extension.zip
+# macOS
+.DS_Store
 
-# IDE specific
-.vscode/
+# IDE
 .idea/
+.vscode/
 
-# Keep the actual test TypeScript files
-!test/*.ts
+# Logs
+*.log
+
+# Temporary files
+*.tmp

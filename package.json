@@ -1,16 +1,9 @@
 {
-  "name": "chrome-etc",
-  "version": "0.1.0",
-  "description": "Chrome extension for enhanced GitHub experience",
   "scripts": {
-    "clean": "rm -rf dist dist-test",
-    "build": "npm run clean && tsc && npm run copy-static",
-    "copy-static": "cp public/manifest.json dist/",
-    "watch": "tsc --watch",
-    "test": "npm run test:fullwidth && npm run test:mermaid",
-    "test:fullwidth": "npm run build && npx ts-node --project tsconfig.test.json test/test-fullwidth.ts",
-    "test:mermaid": "npm run build && npx ts-node --project tsconfig.test.json test/test-mermaid.ts",
-    "package": "npm run build && cd dist && zip -r ../extension.zip *"
+    "test": "npm run build && npx ts-node --project tsconfig.test.json test-extension-assertions.ts",
+    "test:screenshots": "npm run build && npx ts-node --project tsconfig.test.json test-extension.ts",
+    "test:dom": "npm run build && npx ts-node --project tsconfig.test.json test-dom-inspector.ts",
+    "build": "tsc"
   },
   "dependencies": {
     "typescript": "^5.1.6"

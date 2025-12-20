@@ -128,6 +128,19 @@
     // Find the parent comment container from where the user double-clicked
     const target = event.target as HTMLElement;
     
+    // Don't interfere with code blocks or copy buttons
+    // Check if the click is on or within a code block or copy button
+    const isCodeBlock = target.closest('pre') || 
+                       target.closest('.highlight') || 
+                       target.closest('[class*="copy"]') ||
+                       target.closest('button[aria-label*="Copy"]') ||
+                       target.tagName === 'CODE';
+    
+    if (isCodeBlock) {
+      console.log('[GitHub Comment Editor] Double-click on code block or copy button, ignoring');
+      return; // Let the default behavior handle it
+    }
+    
     // GitHub's DOM structure:
     // - Comments: <div id="issuecomment-XXX" data-testid="comment-header">
     // - Issue body: Within [data-testid="issue-viewer-container"] but NOT in an issuecomment
@@ -210,6 +223,7 @@
         console.log(`  Level ${i}: ${current.tagName} id="${current.id}" class="${current.className?.substring(0, 50)}"`);
         current = current.parentElement;
       }
+      // Don't prevent default if we're not handling this double-click
       return;
     }
 
@@ -227,7 +241,8 @@
       return;
     }
 
-    // Prevent text selection from the double-click
+    // Only prevent default behavior if we're actually going to handle this double-click
+    // This ensures we don't break other double-click functionality like code block copy buttons
     event.preventDefault();
     event.stopPropagation();
     
