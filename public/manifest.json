@@ -12,7 +12,8 @@
       "js": [
         "content/github-comment-editor.js",
         "content/github-fullwidth.js",
-        "content/github-mermaid-cleaner.js"
+        "content/github-mermaid-cleaner.js",
+        "content/github-comment-fold.js"
       ],
       "run_at": "document_idle"
     },
