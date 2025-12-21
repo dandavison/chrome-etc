@@ -85,51 +85,29 @@
     }
 
     styleEl.innerHTML = `
-      /* Collapse comment bodies to show only first few lines */
-      body.github-comments-folded .comment-body.markdown-body,
-      body.github-comments-folded .js-comment-body,
-      body.github-comments-folded [data-testid="issue-body"] .markdown-body,
-      body.github-comments-folded .TimelineItem .markdown-body,
-      body.github-comments-folded .timeline-comment .markdown-body {
+      /* Collapse ALL markdown-body elements (comment content) to show only first line */
+      body.github-comments-folded .markdown-body {
         max-height: ${FOLD_MAX_HEIGHT} !important;
         overflow: hidden !important;
         position: relative !important;
       }
 
       /* Add a subtle gradient fade effect at the bottom */
-      body.github-comments-folded .comment-body.markdown-body::after,
-      body.github-comments-folded .js-comment-body::after,
-      body.github-comments-folded [data-testid="issue-body"] .markdown-body::after,
-      body.github-comments-folded .TimelineItem .markdown-body::after,
-      body.github-comments-folded .timeline-comment .markdown-body::after {
+      body.github-comments-folded .markdown-body::after {
         content: '';
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
         height: 0.8em;
-        background: linear-gradient(transparent, var(--bgColor-default, #ffffff));
+        background: linear-gradient(transparent, var(--bgColor-default, var(--color-canvas-default, #ffffff)));
         pointer-events: none;
       }
 
-      /* Dark mode support */
-      @media (prefers-color-scheme: dark) {
-        body.github-comments-folded .comment-body.markdown-body::after,
-        body.github-comments-folded .js-comment-body::after,
-        body.github-comments-folded [data-testid="issue-body"] .markdown-body::after,
-        body.github-comments-folded .TimelineItem .markdown-body::after,
-        body.github-comments-folded .timeline-comment .markdown-body::after {
-          background: linear-gradient(transparent, var(--bgColor-default, #0d1117));
-        }
-      }
-
-      /* GitHub's dark theme class support */
-      [data-color-mode="dark"] body.github-comments-folded .comment-body.markdown-body::after,
-      [data-color-mode="dark"] body.github-comments-folded .js-comment-body::after,
-      [data-color-mode="dark"] body.github-comments-folded [data-testid="issue-body"] .markdown-body::after,
-      [data-color-mode="dark"] body.github-comments-folded .TimelineItem .markdown-body::after,
-      [data-color-mode="dark"] body.github-comments-folded .timeline-comment .markdown-body::after {
-        background: linear-gradient(transparent, var(--bgColor-default, #0d1117));
+      /* GitHub's dark theme support */
+      [data-color-mode="dark"] body.github-comments-folded .markdown-body::after,
+      html[data-color-mode="dark"] body.github-comments-folded .markdown-body::after {
+        background: linear-gradient(transparent, var(--bgColor-default, var(--color-canvas-default, #0d1117)));
       }
     `;
 
