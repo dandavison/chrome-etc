@@ -135,7 +135,8 @@
     // Create a floating button for easy toggling (positioned above fullwidth button)
     const button = document.createElement('button');
     button.id = 'github-comment-fold-toggle';
-    button.innerHTML = isFolded ? '↑↓' : '↓↑';  // Arrows show what click will do
+    // Use same arrows as fullwidth but rotated 90°
+    button.innerHTML = `<span style="display:inline-block;transform:rotate(90deg)">${isFolded ? '⟵⟶' : '⟶⟵'}</span>`;
     button.title = 'Toggle Comment Fold Mode (Cmd/Ctrl+Shift+F)';
     button.style.cssText = `
       position: fixed;
@@ -182,7 +183,7 @@
     const button = document.getElementById('github-comment-fold-toggle');
     if (button) {
       // Arrows show what click will do: folded→expand outward, unfolded→contract inward
-      button.innerHTML = isFolded ? '↑↓' : '↓↑';
+      button.innerHTML = `<span style="display:inline-block;transform:rotate(90deg)">${isFolded ? '⟵⟶' : '⟶⟵'}</span>`;
     }
   }
 
