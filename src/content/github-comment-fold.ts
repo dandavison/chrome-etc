@@ -28,6 +28,9 @@
   function init() {
     console.log('[GitHub Comment Fold] Initializing...');
 
+    // Add base styles for clickable headings (always present)
+    addBaseStyles();
+
     // Apply saved state on page load
     if (isFolded) {
       setTimeout(() => applyFold(), 1000); // Wait for page to fully render
@@ -36,8 +39,36 @@
     // Listen for keyboard shortcut (Cmd/Ctrl+Shift+F)
     document.addEventListener('keydown', handleKeyPress, true);
 
+    // Listen for clicks on headings inside comments (event delegation)
+    document.addEventListener('click', handleHeadingClick, true);
+
     // Add a floating toggle button
     addToggleButton();
+  }
+
+  function addBaseStyles(): void {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'github-comment-fold-base-styles';
+    styleEl.innerHTML = `
+      /* Make headings in comments clickable */
+      .markdown-body h1,
+      .markdown-body h2,
+      .markdown-body h3,
+      .markdown-body h4,
+      .markdown-body h5,
+      .markdown-body h6 {
+        cursor: pointer;
+      }
+      .markdown-body h1:hover,
+      .markdown-body h2:hover,
+      .markdown-body h3:hover,
+      .markdown-body h4:hover,
+      .markdown-body h5:hover,
+      .markdown-body h6:hover {
+        color: #0969da;
+      }
+    `;
+    document.head.appendChild(styleEl);
   }
 
   function isGitHubIssuePage(): boolean {
@@ -54,6 +85,24 @@
       event.stopPropagation();
       toggleFold();
     }
+  }
+
+  function handleHeadingClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+
+    // Check if clicked element is a heading (h1-h6)
+    if (!/^H[1-6]$/.test(target.tagName)) {
+      return;
+    }
+
+    // Check if it's inside a markdown-body (comment content)
+    if (!target.closest('.markdown-body')) {
+      return;
+    }
+
+    // Toggle fold state
+    event.preventDefault();
+    toggleFold();
   }
 
   function toggleFold(): void {
