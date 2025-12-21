@@ -244,7 +244,7 @@
     // Create a floating button for easy toggling
     const button = document.createElement('button');
     button.id = 'github-fullwidth-toggle';
-    button.innerHTML = isFullWidth ? '⟵⟶' : '⟶⟵';
+    button.innerHTML = isFullWidth ? '⟶⟵' : '⟵⟶';  // Arrows show what click will do
     button.title = 'Toggle Full Width Mode (Cmd/Ctrl+Shift+W)';
     button.style.cssText = `
       position: fixed;
@@ -253,7 +253,7 @@
       width: 44px;
       height: 44px;
       border-radius: 50%;
-      background: ${isFullWidth ? '#238636' : '#0969da'};
+      background: #0969da;
       color: white;
       border: none;
       cursor: pointer;
@@ -290,8 +290,8 @@
   function updateToggleButton(): void {
     const button = document.getElementById('github-fullwidth-toggle');
     if (button) {
-      button.innerHTML = isFullWidth ? '⟵⟶' : '⟶⟵';
-      button.style.background = isFullWidth ? '#238636' : '#0969da';
+      // Arrows show what click will do: expanded→contract inward, contracted→expand outward
+      button.innerHTML = isFullWidth ? '⟶⟵' : '⟵⟶';
     }
   }
 
