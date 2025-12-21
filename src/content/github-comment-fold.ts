@@ -136,27 +136,20 @@
     const button = document.createElement('button');
     button.id = 'github-comment-fold-toggle';
     // Use same arrows as fullwidth but rotated 90°
-    button.innerHTML = `<span style="display:inline-block;transform:rotate(90deg)">${isFolded ? '⟵⟶' : '⟶⟵'}</span>`;
+    button.innerHTML = `<span style="display:inline-block;transform:rotate(90deg)">${isFolded ? '⟶⟵' : '⟵⟶'}</span>`;
     button.title = 'Toggle Comment Fold Mode (Cmd/Ctrl+Shift+F)';
     button.style.cssText = `
       position: fixed;
       bottom: ${FOLD_BUTTON_BOTTOM_OFFSET}px;
       right: 20px;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: #0969da;
-      color: white;
+      background: none;
+      color: #6e7681;
       border: none;
       cursor: pointer;
       z-index: 99999;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
-      font-weight: bold;
+      font-size: 24px;
+      padding: 8px;
+      transition: color 0.2s ease;
     `;
 
     button.addEventListener('click', (e) => {
@@ -166,13 +159,11 @@
     });
 
     button.addEventListener('mouseenter', () => {
-      button.style.transform = 'scale(1.1)';
-      button.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.4)';
+      button.style.color = '#0969da';
     });
 
     button.addEventListener('mouseleave', () => {
-      button.style.transform = 'scale(1)';
-      button.style.boxShadow = '0 3px 12px rgba(0, 0, 0, 0.3)';
+      button.style.color = '#6e7681';
     });
 
     document.body.appendChild(button);
@@ -183,7 +174,7 @@
     const button = document.getElementById('github-comment-fold-toggle');
     if (button) {
       // Arrows show what click will do: folded→expand outward, unfolded→contract inward
-      button.innerHTML = `<span style="display:inline-block;transform:rotate(90deg)">${isFolded ? '⟵⟶' : '⟶⟵'}</span>`;
+      button.innerHTML = `<span style="display:inline-block;transform:rotate(90deg)">${isFolded ? '⟶⟵' : '⟵⟶'}</span>`;
     }
   }
 
