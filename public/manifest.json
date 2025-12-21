@@ -30,12 +30,7 @@
     "https://temporaltechnologies.slack.com/*",
     "https://temporalio.slack.com/*"
   ],
-  "commands": {
-    "_execute_action": {
-      "suggested_key": {
-        "default": "Ctrl+B",
-        "mac": "Command+B"
-      }
-    }
+  "action": {
+    "default_title": "GitHub Enhancements"
   }
 }

@@ -9,7 +9,7 @@
   let isFolded = localStorage.getItem('github-comment-fold-enabled') === 'true';
 
   // Configuration
-  const FOLD_MAX_HEIGHT = '1.6em'; // Just the heading/first line - concertina style
+  const FOLD_MAX_HEIGHT = '2.8em'; // Show full heading without clipping
   const FOLD_BUTTON_BOTTOM_OFFSET = 72; // Position above the fullwidth button
 
   // Only run on GitHub issue/PR pages
