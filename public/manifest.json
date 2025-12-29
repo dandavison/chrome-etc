@@ -3,6 +3,11 @@
   "name": "dan-chrome-etc",
   "description": "Chrome extension for anything",
   "version": "0.1",
+  "icons": {
+    "16": "icon-16.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
   "background": {
     "service_worker": "background/background.js"
   },
@@ -40,6 +45,10 @@
     "https://temporalio.slack.com/*"
   ],
   "action": {
-    "default_title": "GitHub Enhancements"
+    "default_title": "dan-chrome-etc",
+    "default_icon": {
+      "16": "icon-16.png",
+      "48": "icon-48.png"
+    }
   }
 }
