@@ -2,7 +2,15 @@
 // Collapses comments to show only the first few lines
 // Toggle with Cmd+Shift+F (Mac) or Ctrl+Shift+F (Windows/Linux)
 
-(function() {
+(async function() {
+  // Check if feature is enabled in settings
+  const result = await chrome.storage.sync.get('settings');
+  const settings = result.settings || {};
+  if (settings['github-comment-fold'] === false) {
+    console.log('[GitHub Comment Fold] Disabled in settings');
+    return;
+  }
+
   console.log('[GitHub Comment Fold] Script initializing...');
 
   // State to track whether fold mode is enabled

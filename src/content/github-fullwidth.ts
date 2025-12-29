@@ -2,7 +2,15 @@
 // Removes sidebars on GitHub issue/PR pages for full-width markdown viewing
 // Toggle with Cmd+Shift+W (Mac) or Ctrl+Shift+W (Windows/Linux)
 
-(function() {
+(async function() {
+  // Check if feature is enabled in settings
+  const result = await chrome.storage.sync.get('settings');
+  const settings = result.settings || {};
+  if (settings['github-fullwidth'] === false) {
+    console.log('[GitHub Full Width] Disabled in settings');
+    return;
+  }
+
   console.log('[GitHub Full Width] Script initializing...');
 
   // State to track whether full width mode is enabled
