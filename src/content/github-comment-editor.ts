@@ -4,13 +4,21 @@
 // - Double-click: Edit specific comment where you clicked
 // Maintains state of last edited comment for quick re-editing
 
-(function() {
+(async function() {
+  // Check if feature is enabled in settings
+  const result = await chrome.storage.sync.get('settings');
+  const settings = result.settings || {};
+  if (settings['github-comment-editor'] === false) {
+    console.log('[GitHub Comment Editor] Disabled in settings');
+    return;
+  }
+
   console.log('[GitHub Comment Editor] Script loaded, checking URL...');
   console.log('[GitHub Comment Editor] Current URL:', window.location.href);
-  
+
   // State: Track the last edited comment
   let lastEditedComment: Element | null = null;
-  
+
   // Only run on GitHub issue/PR pages
   if (!isGitHubIssuePage()) {
     console.log('[GitHub Comment Editor] Not a GitHub issue/PR page, exiting');
@@ -26,13 +34,13 @@
     // Check if comments have loaded yet
     const checkForComments = () => {
       // GitHub loads comments dynamically, look for them with various selectors
-      const hasComments = 
-        document.querySelector('[id^="issuecomment-"]') || 
+      const hasComments =
+        document.querySelector('[id^="issuecomment-"]') ||
         document.querySelector('[class*="IssueBodyViewer"]') ||
         document.querySelector('[data-testid="issue-viewer-container"]');
-      
+
       console.log('[GitHub Comment Editor] Checking for comments...', !!hasComments);
-      
+
       if (hasComments) {
         console.log('[GitHub Comment Editor] Comments detected, setting up event listeners');
         setupEventListeners();
@@ -127,33 +135,33 @@
 
     // Find the parent comment container from where the user double-clicked
     const target = event.target as HTMLElement;
-    
+
     // GitHub's DOM structure:
     // - Comments: <div id="issuecomment-XXX" data-testid="comment-header">
     // - Issue body: Within [data-testid="issue-viewer-container"] but NOT in an issuecomment
-    
+
     let commentContainer: HTMLElement | null = null;
-    
+
     // Strategy: Walk up the DOM tree looking for either a comment or the issue body
     let current: HTMLElement | null = target;
     let foundIssueViewer = false;
     let depth = 0;
-    
+
     console.log('[GitHub Comment Editor] Walking up DOM tree to find container...');
-    
+
     while (current && !commentContainer && depth < 20) {
       const dataTestId = current.getAttribute('data-testid');
-      
+
       // Log each level for debugging
       console.log(`[GitHub Comment Editor] Level ${depth}: ${current.tagName} id="${current.id}" data-testid="${dataTestId}" class="${current.className?.substring(0, 50)}"`);
-      
+
       // Check if this element is a comment using old ID format
       if (current.id && current.id.startsWith('issuecomment-')) {
         console.log('[GitHub Comment Editor] Found issue comment by ID:', current.id);
         commentContainer = current;
         break;
       }
-      
+
       // Check if this element is a comment using new data-testid format
       // Comments have data-testid like "comment-viewer-outer-box-XXX" or "timeline-row-border-XXX"
       if (dataTestId && (
@@ -165,7 +173,7 @@
         commentContainer = current;
         break;
       }
-      
+
       // Check if this is a comment header
       if (dataTestId === 'comment-header') {
         console.log('[GitHub Comment Editor] Found comment header, looking for parent with comment identifier...');
@@ -173,7 +181,7 @@
         let parent = current.parentElement;
         while (parent && depth < 15) {
           const parentTestId = parent.getAttribute('data-testid');
-          if (parent.id?.startsWith('issuecomment-') || 
+          if (parent.id?.startsWith('issuecomment-') ||
               parentTestId?.startsWith('comment-viewer-outer-box-') ||
               parentTestId?.startsWith('timeline-row-border-')) {
             console.log('[GitHub Comment Editor] Found comment container:', parent.id || parentTestId);
@@ -184,24 +192,24 @@
         }
         if (commentContainer) break;
       }
-      
+
       // Track if we've seen the issue viewer container
-      if (dataTestId === 'issue-viewer-container' || 
+      if (dataTestId === 'issue-viewer-container' ||
           current.className?.includes('IssueBodyViewer')) {
         foundIssueViewer = true;
       }
-      
+
       current = current.parentElement;
       depth++;
     }
-    
+
     // If no comment was found but we're inside the issue viewer, treat as issue description
     if (!commentContainer && foundIssueViewer) {
       console.log('[GitHub Comment Editor] No comment found, but inside issue viewer - treating as issue description');
       // Use the issue viewer container as the target
       commentContainer = document.querySelector('[data-testid="issue-viewer-container"]') as HTMLElement;
     }
-    
+
     if (!commentContainer) {
       console.log('[GitHub Comment Editor] Double-click was not inside a comment or issue body');
       console.log('[GitHub Comment Editor] Target element chain:');
@@ -230,7 +238,7 @@
     // Prevent text selection from the double-click
     event.preventDefault();
     event.stopPropagation();
-    
+
     // Clear any text selection that may have occurred
     const selection = window.getSelection();
     if (selection) {
@@ -248,17 +256,17 @@
     // 1. First try to find issue comments (user comments)
     const issueComments = Array.from(document.querySelectorAll('[id^="issuecomment-"]'));
     console.log('[GitHub Comment Editor] Found issue comments:', issueComments.length);
-    
+
     // 2. Find the issue/PR description (the main body)
     const issueBody = document.querySelector('[data-testid="issue-viewer-container"]') ||
                      document.querySelector('[class*="IssueBodyViewer"]') ||
                      document.querySelector('[class*="IssueViewer"]');
-    
+
     console.log('[GitHub Comment Editor] Found issue body:', !!issueBody);
 
     // 3. Combine all comment-like elements
     let allComments: Element[] = [];
-    
+
     // Add issue body as first "comment" if it exists and has an edit button
     if (issueBody) {
       const hasEditButton = issueBody.querySelector('.octicon-kebab-horizontal') ||
@@ -268,19 +276,19 @@
         console.log('[GitHub Comment Editor] Added issue body to comments list');
       }
     }
-    
+
     // Add all issue comments
     allComments = allComments.concat(issueComments);
-    
+
     console.log('[GitHub Comment Editor] Total comments (including issue body):', allComments.length);
 
     if (allComments.length === 0) {
       console.log('[GitHub Comment Editor] No editable comments found');
-      
+
       // Log what we can see on the page for debugging
-      console.log('[GitHub Comment Editor] Kebab buttons on page:', 
+      console.log('[GitHub Comment Editor] Kebab buttons on page:',
                   document.querySelectorAll('.octicon-kebab-horizontal').length);
-      console.log('[GitHub Comment Editor] Elements with data-testid:', 
+      console.log('[GitHub Comment Editor] Elements with data-testid:',
                   document.querySelectorAll('[data-testid]').length);
       return;
     }
@@ -309,20 +317,20 @@
       // Click the edit button
       (editButton as HTMLElement).click();
       console.log('[GitHub Comment Editor] Triggered edit for current comment');
-      
+
       // Save this as the last edited comment
       lastEditedComment = targetComment;
-      const identifier = targetComment.id || 
-                        targetComment.getAttribute('data-testid') || 
+      const identifier = targetComment.id ||
+                        targetComment.getAttribute('data-testid') ||
                         'issue-body';
       console.log('[GitHub Comment Editor] Saved as last edited comment:', identifier);
     } else {
       console.log('[GitHub Comment Editor] Could not find edit button for current comment');
-      
+
       // Try to find any kebab button in the target for debugging
       const anyKebab = targetComment.querySelector('.octicon-kebab-horizontal');
       console.log('[GitHub Comment Editor] Any kebab in target:', !!anyKebab);
-      
+
       if (anyKebab) {
         const parentButton = anyKebab.closest('button');
         console.log('[GitHub Comment Editor] Kebab parent button:', parentButton?.outerHTML.substring(0, 200));
@@ -331,19 +339,19 @@
   }
 
   function editSpecificComment(commentElement: Element): void {
-    const identifier = commentElement.id || 
-                      commentElement.getAttribute('data-testid') || 
+    const identifier = commentElement.id ||
+                      commentElement.getAttribute('data-testid') ||
                       'issue-body';
     console.log('[GitHub Comment Editor] editSpecificComment called for:', identifier);
-    
+
     // Find and click the edit button for this specific comment
     const editButton = findEditButton(commentElement);
-    
+
     if (editButton) {
       // Click the edit button
       (editButton as HTMLElement).click();
       console.log('[GitHub Comment Editor] Triggered edit for specific comment');
-      
+
       // Save this as the last edited comment
       lastEditedComment = commentElement;
       console.log('[GitHub Comment Editor] Saved as last edited comment:', identifier);
@@ -351,10 +359,10 @@
       console.log('[GitHub Comment Editor] Could not find edit button for this comment');
     }
   }
-  
+
   function findEditButton(commentElement: Element): Element | null {
     console.log('[GitHub Comment Editor] Looking for edit button...');
-    
+
     // First, try to find the kebab menu button (three dots)
     const selectors = [
       'button[aria-label*="Show options"]',
@@ -370,11 +378,11 @@
       '[aria-label*="options" i]',
       '[aria-label*="menu" i]'
     ];
-    
+
     let kebabButton: Element | null = null;
     for (const selector of selectors) {
       let found: Element | null | undefined;
-      
+
       if (selector === '.octicon-kebab-horizontal') {
         // For the kebab icon, find its parent button/summary
         const icon = commentElement.querySelector(selector);
@@ -382,7 +390,7 @@
       } else {
         found = commentElement.querySelector(selector);
       }
-      
+
       console.log(`[GitHub Comment Editor] Selector "${selector}" found:`, !!found);
       if (found) {
         kebabButton = found;
@@ -402,7 +410,7 @@
         // Only try to find the edit button once
         if (!menuFound) {
           const editMenuItem = findEditMenuItem();
-          
+
           if (editMenuItem) {
             menuFound = true;
             obs.disconnect();
@@ -425,7 +433,7 @@
       const kebabButtonElement = kebabButton as HTMLElement;
       setTimeout(() => {
         observer.disconnect();
-        
+
         if (!menuFound) {
           // Try one more time directly
           const editMenuItem = findEditMenuItem();
@@ -445,7 +453,7 @@
           }
         }
       }, 300);
-      
+
       return kebabButton; // Return something truthy to indicate we handled it
     }
 
@@ -458,29 +466,29 @@
 
   function findEditMenuItem(): Element | null {
     console.log('[GitHub Comment Editor] Looking for edit menu item...');
-    
+
     // Find Edit specifically in ActionList items (GitHub's menu component)
     const editInMenu = Array.from(
       document.querySelectorAll('.prc-ActionList-ItemLabel-TmBhn, [class*="ActionList-ItemLabel"]')
     ).find(el => el.textContent?.trim() === 'Edit');
-    
+
     if (editInMenu) {
       console.log('[GitHub Comment Editor] Found Edit in menu:', editInMenu);
-      
+
       // Click the parent link/button/menuitem
       // GitHub uses <li role="menuitem"> as the clickable element
       const clickable = editInMenu.closest('a, button, [role="menuitem"]');
       console.log('[GitHub Comment Editor] Clickable element:', clickable);
-      
+
       if (clickable) {
         return clickable;
       }
     }
-    
+
     // Fallback: broader search if the class names change
     const allMenuItems = document.querySelectorAll('[role="menuitem"], li[role="menuitem"], a[role="menuitem"], button[role="menuitem"]');
     console.log(`[GitHub Comment Editor] Fallback search: checking ${allMenuItems.length} menu items`);
-    
+
     for (const item of Array.from(allMenuItems)) {
       const text = item.textContent?.trim();
       // Only look for exact "Edit" text, not buttons like "Edit issue title"
@@ -489,7 +497,7 @@
         return item;
       }
     }
-    
+
     console.log('[GitHub Comment Editor] Edit option not found in menu');
     return null;
   }
