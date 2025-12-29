@@ -22,6 +22,11 @@
       "js": ["content/github-mermaid-cleaner.js"],
       "run_at": "document_idle",
       "all_frames": true
+    },
+    {
+      "matches": ["https://www.keybr.com/*"],
+      "js": ["content/keybr-finger-colors.js"],
+      "run_at": "document_idle"
     }
   ],
   "permissions": ["scripting", "activeTab", "webNavigation", "tabs"],
