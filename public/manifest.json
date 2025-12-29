@@ -29,7 +29,11 @@
       "run_at": "document_idle"
     }
   ],
-  "permissions": ["scripting", "activeTab", "webNavigation", "tabs"],
+  "permissions": ["scripting", "activeTab", "webNavigation", "tabs", "storage"],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
   "host_permissions": [
     "http://wormhole:7117/*",
     "https://temporaltechnologies.slack.com/*",

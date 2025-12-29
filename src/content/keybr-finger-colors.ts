@@ -2,18 +2,26 @@
 // Colors each letter in the typing practice text based on which finger should type it
 // Uses colors matching the keybr keyboard visualization
 
-(function () {
+(async function () {
+  // Check if feature is enabled in settings
+  const result = await chrome.storage.sync.get('settings');
+  const settings = result.settings || {};
+  if (settings['keybr-finger-colors'] === false) {
+    console.log('[Keybr Finger Colors] Disabled in settings');
+    return;
+  }
+
   console.log('[Keybr Finger Colors] Script initializing...');
 
   // Finger color mappings (matching keybr's keyboard colors)
   const FINGER_COLORS = {
     leftPinky: '#66bb6a',    // Green - pinky
-    leftRing: '#9ccc65',     // Yellow-green - ring
+    leftRing: '#a5b34d',     // Mossy yellow-green - ring
     leftMiddle: '#ffb74d',   // Orange - middle
     leftIndex: '#78909c',    // Bluish gray - index
     rightIndex: '#f06292',   // Pink - index
     rightMiddle: '#ffb74d',  // Orange - middle
-    rightRing: '#9ccc65',    // Yellow-green - ring
+    rightRing: '#a5b34d',    // Mossy yellow-green - ring
     rightPinky: '#66bb6a',   // Green - pinky
     thumb: '#e57373',        // Coral/red - thumb (space)
   };
