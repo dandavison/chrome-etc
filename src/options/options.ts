@@ -57,3 +57,4 @@ async function init(): Promise<void> {
 
 document.addEventListener('DOMContentLoaded', init);
 
+

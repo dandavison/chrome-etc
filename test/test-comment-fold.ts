@@ -126,7 +126,78 @@ async function testCommentFold(context: BrowserContext, issueUrl: string, issueI
     console.log('  ⚠️  Test 5 PARTIAL: max-height applied but heights unchanged (elements may already be small)');
   }
 
-  // Test 6: Toggle back off
+  // Test 6: Per-comment unfold - clicking heading should unfold only that comment
+  console.log('  🔍 Test 6: Testing per-comment unfold...');
+
+  // First, make sure we're in folded state
+  await toggleButton.click();
+  await page.waitForTimeout(500);
+
+  // Find a heading in a markdown-body that has content (height > threshold when unfolded)
+  const headingInfo = await page.evaluate(() => {
+    const markdownBodies = document.querySelectorAll('.markdown-body');
+    for (let i = 0; i < markdownBodies.length; i++) {
+      const mb = markdownBodies[i];
+      const heading = mb.querySelector('h1, h2, h3, h4, h5, h6');
+      if (heading) {
+        return {
+          index: i,
+          hasHeading: true,
+          headingText: heading.textContent?.slice(0, 30) || ''
+        };
+      }
+    }
+    return { index: -1, hasHeading: false, headingText: '' };
+  });
+
+  if (!headingInfo.hasHeading) {
+    console.log('  ⚠️  Test 6 SKIPPED: No headings found in comments');
+  } else {
+    console.log(`     Found heading "${headingInfo.headingText}..." in comment ${headingInfo.index}`);
+
+    // Get heights of all comments before clicking heading
+    const heightsBeforeClick = await page.evaluate(() => {
+      return Array.from(document.querySelectorAll('.markdown-body')).map(el => (el as HTMLElement).offsetHeight);
+    });
+
+    // Click on the heading
+    const heading = await page.$('.markdown-body h1, .markdown-body h2, .markdown-body h3');
+    if (heading) {
+      await heading.click();
+      await page.waitForTimeout(500);
+
+      // Get heights after clicking
+      const heightsAfterClick = await page.evaluate(() => {
+        return Array.from(document.querySelectorAll('.markdown-body')).map(el => (el as HTMLElement).offsetHeight);
+      });
+
+      // Check: the clicked comment should be expanded, others should stay folded
+      const clickedExpanded = heightsAfterClick[headingInfo.index] > heightsBeforeClick[headingInfo.index];
+
+      // Check if OTHER comments stayed folded (at least one other should not have changed)
+      let othersStayedFolded = false;
+      for (let i = 0; i < Math.min(heightsBeforeClick.length, heightsAfterClick.length); i++) {
+        if (i !== headingInfo.index && heightsAfterClick[i] === heightsBeforeClick[i]) {
+          othersStayedFolded = true;
+          break;
+        }
+      }
+
+      console.log(`     Clicked comment height: ${heightsBeforeClick[headingInfo.index]}px → ${heightsAfterClick[headingInfo.index]}px`);
+
+      if (clickedExpanded && othersStayedFolded) {
+        console.log('  ✅ Test 6 PASSED: Only clicked comment expanded');
+      } else if (!clickedExpanded) {
+        console.error('  ❌ Test 6 FAILED: Clicked comment did not expand');
+        success = false;
+      } else if (!othersStayedFolded) {
+        console.error('  ❌ Test 6 FAILED: Other comments also expanded (should only expand clicked one)');
+        success = false;
+      }
+    }
+  }
+
+  // Test 7: Toggle back off
   console.log('  🖱️ Toggling fold off...');
   await toggleButton.click();
   await page.waitForTimeout(500);
@@ -136,10 +207,10 @@ async function testCommentFold(context: BrowserContext, issueUrl: string, issueI
   });
 
   if (!foldClassRemoved) {
-    console.error('  ❌ Test 6 FAILED: Fold class not removed after toggle off');
+    console.error('  ❌ Test 7 FAILED: Fold class not removed after toggle off');
     success = false;
   } else {
-    console.log('  ✅ Test 6 PASSED: Fold class removed after toggle');
+    console.log('  ✅ Test 7 PASSED: Fold class removed after toggle');
   }
 
   await page.close();
@@ -209,4 +280,5 @@ async function runTests() {
 }
 
 runTests().catch(console.error);
+
 
