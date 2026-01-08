@@ -2,51 +2,64 @@
 
 This extension uses **visual regression testing** because browser extension UI cannot be reliably verified with DOM assertions alone.
 
-## Quick Start
+## Why Screenshots?
+
+DOM-based tests (measuring heights, checking classes) can pass while the feature is visually broken. Screenshots capture what the user actually sees.
+
+## Running Tests
 
 ```bash
-# Run visual test and capture screenshots
-npm run test:visual
-
-# Screenshots are saved to test/screenshots/
+npm test                 # Run all visual tests
+npm run test:visual      # Same thing
 ```
 
-## How It Works
+Screenshots are saved to `test/screenshots/`.
 
-1. Playwright launches Chrome with the extension loaded
-2. Navigates to a test GitHub issue
-3. Captures screenshots at key states
-4. **You (human or AI) verify the screenshots**
+## Verifying Tests
 
-## Test Issue
+After running tests:
+1. Read each screenshot file in `test/screenshots/`
+2. Verify the UI looks correct for each state
+3. If something looks wrong, the feature is broken
 
-Public test issue: https://github.com/dandavison/test/issues/7
+## Test Resources
 
-## Verifying Screenshots
+- **Public test repo**: https://github.com/dandavison/test
+- **Test issue**: https://github.com/dandavison/test/issues/7 (has headings, comments, code blocks)
 
-After running `npm run test:visual`, check these files:
+## Writing New Visual Tests
 
-| File | Expected Content |
-|------|------------------|
-| `01-initial-unfolded.png` | Full comment content visible |
-| `02-all-folded.png` | Concertina view - only headings visible |
-| `03-one-comment-expanded.png` | First comment expanded, others still folded |
-| `04-all-unfolded-again.png` | All content visible again |
-
-### For AI Agents
-
-To verify, read each screenshot file and confirm:
-- `02-all-folded.png`: Should show ~4 headings stacked vertically with no body text
-- `03-one-comment-expanded.png`: First heading should be blue, with full content below it
-
-## Adding New Visual Tests
-
-See `test/test-comment-fold-visual.ts` as a template. Key pattern:
+Use Playwright to launch Chrome with the extension, navigate to pages, interact, and capture screenshots.
 
 ```typescript
-await page.goto(URL);
-await takeScreenshot(page, 'state-name');
-await page.click('#button');
-await takeScreenshot(page, 'after-click');
+import { chromium } from 'playwright';
+import path from 'path';
+
+const extensionPath = path.join(__dirname, '..', 'dist');
+
+const context = await chromium.launchPersistentContext('', {
+  headless: false,
+  args: [
+    `--disable-extensions-except=${extensionPath}`,
+    `--load-extension=${extensionPath}`,
+  ],
+});
+
+const page = await context.newPage();
+await page.goto('https://github.com/dandavison/test/issues/7');
+await page.screenshot({ path: 'test/screenshots/state-1.png' });
+
+// Interact with extension UI
+await page.click('#my-button');
+await page.screenshot({ path: 'test/screenshots/state-2.png' });
+
+await context.close();
 ```
 
+## For AI Agents
+
+To test a feature:
+1. Run `npm test`
+2. Read each PNG file in `test/screenshots/`
+3. Describe what you see and whether it matches expected behavior
+4. If broken, fix the code and re-run
