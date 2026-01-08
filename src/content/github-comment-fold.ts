@@ -117,7 +117,7 @@
       // in the hierarchy so the CSS :not(.comment-expanded) works on all levels
       const allMarkdownBodies = collectMarkdownBodyAncestors(markdownBody);
       const shouldExpand = !markdownBody.classList.contains('comment-expanded');
-      
+
       allMarkdownBodies.forEach(mb => {
         if (shouldExpand) {
           mb.classList.add('comment-expanded');
@@ -125,7 +125,7 @@
           mb.classList.remove('comment-expanded');
         }
       });
-      
+
       console.log(`[GitHub Comment Fold] Toggled ${allMarkdownBodies.length} .markdown-body elements, expanded=${shouldExpand}`);
     } else {
       // If not in fold mode, clicking a heading enables fold mode
@@ -137,14 +137,14 @@
   function collectMarkdownBodyAncestors(element: Element): Element[] {
     const result: Element[] = [];
     let current: Element | null = element;
-    
+
     while (current) {
       if (current.classList.contains('markdown-body')) {
         result.push(current);
       }
       current = current.parentElement;
     }
-    
+
     return result;
   }
 
