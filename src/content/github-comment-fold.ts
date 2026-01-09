@@ -81,7 +81,8 @@
 
   function isGitHubIssuePage(): boolean {
     const url = window.location.href;
-    return /github\.com\/[^\/]+\/[^\/]+\/(issues|pull|discussions)/.test(url);
+    // Only issues and discussions, not PRs
+    return /github\.com\/[^\/]+\/[^\/]+\/(issues|discussions)/.test(url);
   }
 
   function handleKeyPress(event: KeyboardEvent): void {
