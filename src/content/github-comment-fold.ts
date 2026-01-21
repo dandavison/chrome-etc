@@ -76,41 +76,86 @@
         color: #0969da;
       }
 
-      /* Fold indicator floated at start of content */
-      .markdown-body > :first-child::before {
-        content: '▾';
-        float: left;
-        margin-left: -1.2em;
+      /* Fold indicator element styles */
+      .github-fold-indicator {
+        display: inline-block;
         color: #6e7681;
-        font-size: 0.75em;
-        opacity: 0;
-        transition: opacity 0.15s ease, color 0.15s ease;
+        font-size: 12px;
+        cursor: pointer;
+        user-select: none;
+        margin-right: 6px;
+        transition: color 0.15s ease;
+        vertical-align: middle;
       }
-
-      /* Show indicator on hover when not folded */
-      .markdown-body:hover > :first-child::before {
-        opacity: 0.5;
-      }
-
-      /* When folded: always show expand indicator (▸) */
-      body.github-comments-folded .markdown-body:not(.comment-expanded) > :first-child::before {
-        content: '▸';
-        opacity: 0.7;
-      }
-
-      /* When folded: expanded sections show collapse indicator (▾) */
-      body.github-comments-folded .markdown-body.comment-expanded > :first-child::before {
-        content: '▾';
-        opacity: 0.7;
-      }
-
-      /* Hover states when folded */
-      body.github-comments-folded .markdown-body:hover > :first-child::before {
-        opacity: 1;
+      .github-fold-indicator:hover {
         color: #0969da;
+      }
+
+      /* Position indicator at start of first element */
+      .markdown-body > :first-child {
+        position: relative;
       }
     `;
     document.head.appendChild(styleEl);
+  }
+
+  // Add or update fold indicators on all markdown-body elements
+  function updateFoldIndicators(): void {
+    const markdownBodies = document.querySelectorAll('.markdown-body');
+
+    markdownBodies.forEach(mb => {
+      // Skip nested markdown-body elements (only target top-level ones in each comment)
+      if (mb.parentElement?.closest('.markdown-body')) {
+        return;
+      }
+
+      const firstChild = mb.firstElementChild;
+      if (!firstChild) return;
+
+      // Check if indicator already exists
+      let indicator = firstChild.querySelector('.github-fold-indicator') as HTMLElement;
+
+      if (isFolded) {
+        // Create indicator if it doesn't exist
+        if (!indicator) {
+          indicator = document.createElement('span');
+          indicator.className = 'github-fold-indicator';
+          indicator.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSingleComment(mb);
+          });
+          firstChild.insertBefore(indicator, firstChild.firstChild);
+        }
+
+        // Update indicator based on expanded state
+        const isExpanded = mb.classList.contains('comment-expanded');
+        indicator.textContent = isExpanded ? '▾' : '▸';
+        indicator.title = isExpanded ? 'Click to collapse' : 'Click to expand';
+      } else {
+        // Remove indicator when not in fold mode
+        if (indicator) {
+          indicator.remove();
+        }
+      }
+    });
+  }
+
+  // Toggle a single comment's expanded state
+  function toggleSingleComment(markdownBody: Element): void {
+    const allMarkdownBodies = collectMarkdownBodyAncestors(markdownBody);
+    const shouldExpand = !markdownBody.classList.contains('comment-expanded');
+
+    allMarkdownBodies.forEach(mb => {
+      if (shouldExpand) {
+        mb.classList.add('comment-expanded');
+      } else {
+        mb.classList.remove('comment-expanded');
+      }
+    });
+
+    updateFoldIndicators();
+    console.log(`[GitHub Comment Fold] Toggled comment, expanded=${shouldExpand}`);
   }
 
   function isGitHubIssuePage(): boolean {
@@ -148,20 +193,7 @@
 
     // If we're in global fold mode, toggle just this comment
     if (isFolded) {
-      // GitHub has nested .markdown-body elements - we need to toggle ALL of them
-      // in the hierarchy so the CSS :not(.comment-expanded) works on all levels
-      const allMarkdownBodies = collectMarkdownBodyAncestors(markdownBody);
-      const shouldExpand = !markdownBody.classList.contains('comment-expanded');
-
-      allMarkdownBodies.forEach(mb => {
-        if (shouldExpand) {
-          mb.classList.add('comment-expanded');
-        } else {
-          mb.classList.remove('comment-expanded');
-        }
-      });
-
-      console.log(`[GitHub Comment Fold] Toggled ${allMarkdownBodies.length} .markdown-body elements, expanded=${shouldExpand}`);
+      toggleSingleComment(markdownBody);
     } else {
       // If not in fold mode, clicking a heading enables fold mode
       toggleFold();
@@ -238,6 +270,9 @@
       }
     `;
 
+    // Add fold indicators to all comments
+    updateFoldIndicators();
+
     console.log('[GitHub Comment Fold] Fold styles applied');
   }
 
@@ -256,6 +291,9 @@
     if (styleEl) {
       styleEl.remove();
     }
+
+    // Remove fold indicators
+    updateFoldIndicators();
   }
 
   function addToggleButton(): void {
