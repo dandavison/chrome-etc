@@ -2,16 +2,18 @@
 // Collapses comments to show only the first few lines
 // Toggle with Cmd+Shift+F (Mac) or Ctrl+Shift+F (Windows/Linux)
 
+const DEBUG_FOLD = false;
+function logFold(...args: unknown[]) { if (DEBUG_FOLD) console.log(...args); }
+
 (async function() {
-  // Check if feature is enabled in settings
   const result = await chrome.storage.sync.get('settings');
   const settings = result.settings || {};
   if (settings['github-comment-fold'] === false) {
-    console.log('[GitHub Comment Fold] Disabled in settings');
+    logFold('[GitHub Comment Fold] Disabled in settings');
     return;
   }
 
-  console.log('[GitHub Comment Fold] Script initializing...');
+  logFold('[GitHub Comment Fold] Script initializing...');
 
   // State to track whether fold mode is enabled
   let isFolded = localStorage.getItem('github-comment-fold-enabled') === 'true';
@@ -22,7 +24,7 @@
 
   // Only run on GitHub issue/PR pages
   if (!isGitHubIssuePage()) {
-    console.log('[GitHub Comment Fold] Not a GitHub issue/PR page, exiting');
+    logFold('[GitHub Comment Fold] Not a GitHub issue/PR page, exiting');
     return;
   }
 
@@ -34,7 +36,7 @@
   }
 
   function init() {
-    console.log('[GitHub Comment Fold] Initializing...');
+    logFold('[GitHub Comment Fold] Initializing...');
 
     // Add base styles for clickable headings (always present)
     addBaseStyles();
@@ -127,7 +129,7 @@
         }
       });
 
-      console.log(`[GitHub Comment Fold] Toggled ${allMarkdownBodies.length} .markdown-body elements, expanded=${shouldExpand}`);
+      logFold(`[GitHub Comment Fold] Toggled ${allMarkdownBodies.length} .markdown-body elements, expanded=${shouldExpand}`);
     } else {
       // If not in fold mode, clicking a heading enables fold mode
       toggleFold();
@@ -160,11 +162,11 @@
     }
 
     updateToggleButton();
-    console.log(`[GitHub Comment Fold] Mode ${isFolded ? 'enabled' : 'disabled'}`);
+    logFold(`[GitHub Comment Fold] Mode ${isFolded ? 'enabled' : 'disabled'}`);
   }
 
   function applyFold(): void {
-    console.log('[GitHub Comment Fold] Applying fold styles...');
+    logFold('[GitHub Comment Fold] Applying fold styles...');
 
     // Add class to body to track state
     document.body.classList.add('github-comments-folded');
@@ -204,11 +206,11 @@
       }
     `;
 
-    console.log('[GitHub Comment Fold] Fold styles applied');
+    logFold('[GitHub Comment Fold] Fold styles applied');
   }
 
   function removeFold(): void {
-    console.log('[GitHub Comment Fold] Removing fold styles...');
+    logFold('[GitHub Comment Fold] Removing fold styles...');
 
     // Remove class from body
     document.body.classList.remove('github-comments-folded');
@@ -265,7 +267,7 @@
     });
 
     document.body.appendChild(button);
-    console.log('[GitHub Comment Fold] Toggle button added');
+    logFold('[GitHub Comment Fold] Toggle button added');
   }
 
   function updateToggleButton(): void {
@@ -276,6 +278,6 @@
     }
   }
 
-  console.log('[GitHub Comment Fold] Script loaded - Press Cmd/Ctrl+Shift+F to toggle');
+  logFold('[GitHub Comment Fold] Script loaded - Press Cmd/Ctrl+Shift+F to toggle');
 })();
 

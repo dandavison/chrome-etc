@@ -2,16 +2,18 @@
 // Colors each letter in the typing practice text based on which finger should type it
 // Uses colors matching the keybr keyboard visualization
 
+const DEBUG_KEYBR = false;
+function logKeybr(...args: unknown[]) { if (DEBUG_KEYBR) console.log(...args); }
+
 (async function () {
-  // Check if feature is enabled in settings
   const result = await chrome.storage.sync.get('settings');
   const settings = result.settings || {};
   if (settings['keybr-finger-colors'] === false) {
-    console.log('[Keybr Finger Colors] Disabled in settings');
+    logKeybr('[Keybr Finger Colors] Disabled in settings');
     return;
   }
 
-  console.log('[Keybr Finger Colors] Script initializing...');
+  logKeybr('[Keybr Finger Colors] Script initializing...');
 
   // Finger color mappings (matching keybr's keyboard colors)
   const FINGER_COLORS = {
@@ -133,7 +135,7 @@
       const el = candidates[i];
       // Check if it contains word spans
       if (el.querySelector('span[style*="inline-block"]')) {
-        console.log('[Keybr Finger Colors] Found text container:', el);
+        logKeybr('[Keybr Finger Colors] Found text container:', el);
         return el;
       }
     }
@@ -143,7 +145,7 @@
     for (let i = 0; i < fontContainers.length; i++) {
       const el = fontContainers[i];
       if (el.querySelector('span[style*="inline-block"]')) {
-        console.log('[Keybr Finger Colors] Found text container via font:', el);
+        logKeybr('[Keybr Finger Colors] Found text container via font:', el);
         return el;
       }
     }
@@ -193,13 +195,13 @@
   function findAndColorizeTypingText(): void {
     const container = findTextContainer();
     if (!container) {
-      console.log('[Keybr Finger Colors] No text container found');
+      logKeybr('[Keybr Finger Colors] No text container found');
       return;
     }
 
     // Find word spans (display: inline-block)
     const wordSpans = container.querySelectorAll('span[style*="inline-block"]');
-    console.log('[Keybr Finger Colors] Found', wordSpans.length, 'word spans');
+    logKeybr('[Keybr Finger Colors] Found', wordSpans.length, 'word spans');
 
     for (let i = 0; i < wordSpans.length; i++) {
       const wordSpan = wordSpans[i];
@@ -208,7 +210,7 @@
       const letterSpans = wordSpan.querySelectorAll('span[style*="color"]');
 
       if (letterSpans.length > 0) {
-        console.log('[Keybr Finger Colors] Word', i, 'has', letterSpans.length, 'letter spans');
+        logKeybr('[Keybr Finger Colors] Word', i, 'has', letterSpans.length, 'letter spans');
         for (let j = 0; j < letterSpans.length; j++) {
           colorizeSpan(letterSpans[j]);
         }
@@ -216,7 +218,7 @@
         // Direct text content in the word span
         const text = wordSpan.textContent;
         if (text && text.trim()) {
-          console.log('[Keybr Finger Colors] Word', i, 'has direct text:', text);
+          logKeybr('[Keybr Finger Colors] Word', i, 'has direct text:', text);
           colorizeSpan(wordSpan);
         }
       }
@@ -247,11 +249,11 @@
       characterData: true,
     });
 
-    console.log('[Keybr Finger Colors] Mutation observer set up');
+    logKeybr('[Keybr Finger Colors] Mutation observer set up');
   }
 
   function init(): void {
-    console.log('[Keybr Finger Colors] Initializing...');
+    logKeybr('[Keybr Finger Colors] Initializing...');
 
     // Add custom styles for !important override
     const style = document.createElement('style');
@@ -283,5 +285,5 @@
     init();
   }
 
-  console.log('[Keybr Finger Colors] Script loaded');
+  logKeybr('[Keybr Finger Colors] Script loaded');
 })();

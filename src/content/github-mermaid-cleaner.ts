@@ -3,16 +3,18 @@
  * Removes the zoom/pan control panels from Mermaid diagrams on GitHub
  */
 
+const DEBUG_MERMAID = false;
+function logMermaid(...args: unknown[]) { if (DEBUG_MERMAID) console.log(...args); }
+
 (async function() {
-  // Check if feature is enabled in settings
   const result = await chrome.storage.sync.get('settings');
   const settings = result.settings || {};
   if (settings['github-mermaid-cleaner'] === false) {
-    console.log('[GitHub Mermaid Cleaner] Disabled in settings');
+    logMermaid('[GitHub Mermaid Cleaner] Disabled in settings');
     return;
   }
 
-  console.log('[GitHub Mermaid Cleaner] Script loaded on', window.location.hostname);
+  logMermaid('[GitHub Mermaid Cleaner] Script loaded on', window.location.hostname);
 
   // Function to inject styles
   function hideMermaidControls(): void {
@@ -88,5 +90,5 @@
     }
   }).observe(document, { subtree: true, childList: true });
 
-  console.log('[GitHub Mermaid Cleaner] Mermaid diagram controls hidden');
+  logMermaid('[GitHub Mermaid Cleaner] Mermaid diagram controls hidden');
 })();

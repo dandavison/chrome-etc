@@ -2,16 +2,18 @@
 // Removes sidebars on GitHub issue/PR pages for full-width markdown viewing
 // Toggle with Cmd+Shift+W (Mac) or Ctrl+Shift+W (Windows/Linux)
 
+const DEBUG_FULLWIDTH = false;
+function logFullwidth(...args: unknown[]) { if (DEBUG_FULLWIDTH) console.log(...args); }
+
 (async function() {
-  // Check if feature is enabled in settings
   const result = await chrome.storage.sync.get('settings');
   const settings = result.settings || {};
   if (settings['github-fullwidth'] === false) {
-    console.log('[GitHub Full Width] Disabled in settings');
+    logFullwidth('[GitHub Full Width] Disabled in settings');
     return;
   }
 
-  console.log('[GitHub Full Width] Script initializing...');
+  logFullwidth('[GitHub Full Width] Script initializing...');
 
   // State to track whether full width mode is enabled
   let isFullWidth = localStorage.getItem('github-fullwidth-enabled') === 'true';
@@ -19,7 +21,7 @@
 
   // Only run on GitHub issue/PR pages
   if (!isGitHubIssuePage()) {
-    console.log('[GitHub Full Width] Not a GitHub issue/PR page, exiting');
+    logFullwidth('[GitHub Full Width] Not a GitHub issue/PR page, exiting');
     return;
   }
 
@@ -31,7 +33,7 @@
   }
 
   function init() {
-    console.log('[GitHub Full Width] Initializing...');
+    logFullwidth('[GitHub Full Width] Initializing...');
 
     // Apply saved state on page load
     if (isFullWidth) {
@@ -75,11 +77,11 @@
     }
 
     updateToggleButton();
-    console.log(`[GitHub Full Width] Mode ${isFullWidth ? 'enabled' : 'disabled'}`);
+    logFullwidth(`[GitHub Full Width] Mode ${isFullWidth ? 'enabled' : 'disabled'}`);
   }
 
   function applyFullWidth(): void {
-    console.log('[GitHub Full Width] Applying full width styles...');
+    logFullwidth('[GitHub Full Width] Applying full width styles...');
 
     // Create or update style element
     let styleEl = document.getElementById('github-fullwidth-styles');
@@ -209,12 +211,12 @@
     // Log what we found
     const sidebar = document.querySelector('[data-testid="sticky-sidebar"]');
     const metadataSidebar = document.querySelector('[class*="metadataSidebar"]');
-    console.log('[GitHub Full Width] Sidebar found:', !!sidebar);
-    console.log('[GitHub Full Width] Metadata sidebar found:', !!metadataSidebar);
+    logFullwidth('[GitHub Full Width] Sidebar found:', !!sidebar);
+    logFullwidth('[GitHub Full Width] Metadata sidebar found:', !!metadataSidebar);
   }
 
   function removeFullWidth(): void {
-    console.log('[GitHub Full Width] Removing full width styles...');
+    logFullwidth('[GitHub Full Width] Removing full width styles...');
     const styleEl = document.getElementById('github-fullwidth-styles');
     if (styleEl) {
       styleEl.remove();
@@ -230,7 +232,7 @@
         if (sidebar) {
           const style = window.getComputedStyle(sidebar);
           if (style.display !== 'none') {
-            console.log('[GitHub Full Width] Sidebar re-appeared, reapplying styles...');
+            logFullwidth('[GitHub Full Width] Sidebar re-appeared, reapplying styles...');
             applyFullWidth();
           }
         }
@@ -283,7 +285,7 @@
     });
 
     document.body.appendChild(button);
-    console.log('[GitHub Full Width] Toggle button added');
+    logFullwidth('[GitHub Full Width] Toggle button added');
   }
 
   function updateToggleButton(): void {
@@ -294,5 +296,5 @@
     }
   }
 
-  console.log('[GitHub Full Width] Script loaded - Press Cmd/Ctrl+Shift+W to toggle');
+  logFullwidth('[GitHub Full Width] Script loaded - Press Cmd/Ctrl+Shift+W to toggle');
 })();
