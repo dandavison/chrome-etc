@@ -5,10 +5,6 @@
  * Captures screenshots at key states for AI visual verification.
  * Run with: npx ts-node --project tsconfig.test.json test/test-comment-fold-visual.ts
  *
- * Options:
- *   --headed    Show browser window (default: headless)
- *   --issue=N   Test against issue N (default: 7)
- *
  * Output: Screenshots in test/screenshots/ that can be shown to an AI for verification
  */
 
@@ -16,14 +12,8 @@ import { chromium, BrowserContext, Page } from 'playwright';
 import path from 'path';
 import fs from 'fs';
 
-// Parse command line args
-const args = process.argv.slice(2);
-const HEADED = args.includes('--headed');
-const issueArg = args.find(a => a.startsWith('--issue='));
-const ISSUE_NUM = issueArg ? issueArg.split('=')[1] : '7';
-
 const SCREENSHOTS_DIR = path.join(__dirname, 'screenshots');
-const TEST_URL = `https://github.com/dandavison/test/issues/${ISSUE_NUM}`;
+const TEST_URL = 'https://github.com/dandavison/test/issues/7'; // Public test issue with headings
 
 async function ensureDir(dir: string) {
   if (!fs.existsSync(dir)) {
@@ -47,27 +37,25 @@ async function runVisualTest() {
   console.log('📁 Extension path:', extensionPath);
 
   const context = await chromium.launchPersistentContext('', {
-    headless: !HEADED,
+    headless: false,
     args: [
       `--disable-extensions-except=${extensionPath}`,
       `--load-extension=${extensionPath}`,
       '--no-sandbox',
-      ...(HEADED ? [] : ['--headless=new']),
     ],
     viewport: { width: 1400, height: 900 },
   });
 
-  console.log(`🌐 Chrome launched ${HEADED ? '(headed)' : '(headless)'} with extension\n`);
-  console.log(`📍 Testing: ${TEST_URL}\n`);
+  console.log('🌐 Chrome launched with extension\n');
   await new Promise(r => setTimeout(r, 2000));
 
   const page = await context.newPage();
 
   try {
-    // Navigate to a GitHub issue
+    // Navigate to a GitHub issue with headings
     console.log('📍 Navigating to GitHub issue...');
-    await page.goto(TEST_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(5000); // Wait for dynamic content and extension to load
+    await page.goto(TEST_URL, { waitUntil: 'networkidle', timeout: 60000 });
+    await page.waitForTimeout(3000);
 
     // Screenshot 1: Initial state (unfolded)
     console.log('\n--- State 1: Initial (unfolded) ---');
@@ -122,11 +110,9 @@ async function runVisualTest() {
     await captureScreenshot(page, 'ERROR-exception');
   }
 
-  // Keep browser open briefly for manual inspection if headed
-  if (HEADED) {
-    console.log('\n🔍 Browser staying open for 10 seconds...');
-    await new Promise(r => setTimeout(r, 10000));
-  }
+  // Keep browser open briefly for manual inspection
+  console.log('\n🔍 Browser staying open for 10 seconds...');
+  await new Promise(r => setTimeout(r, 10000));
 
   await context.close();
 }
