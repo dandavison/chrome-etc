@@ -66,6 +66,7 @@
       .markdown-body h5,
       .markdown-body h6 {
         cursor: pointer;
+        position: relative;
       }
       .markdown-body h1:hover,
       .markdown-body h2:hover,
@@ -76,36 +77,61 @@
         color: #0969da;
       }
 
-      /* Fold indicator floated at start of content */
-      .markdown-body > :first-child::before {
+      /* Fold/unfold indicator icons */
+      .markdown-body h1::before,
+      .markdown-body h2::before,
+      .markdown-body h3::before,
+      .markdown-body h4::before,
+      .markdown-body h5::before,
+      .markdown-body h6::before {
         content: '▾';
-        float: left;
-        margin-left: -1.2em;
-        color: #6e7681;
-        font-size: 0.75em;
+        position: absolute;
+        left: -1.2em;
         opacity: 0;
-        transition: opacity 0.15s ease, color 0.15s ease;
+        color: #6e7681;
+        font-size: 0.7em;
+        transition: opacity 0.15s ease;
       }
 
-      /* Show indicator on hover when not folded */
-      .markdown-body:hover > :first-child::before {
+      /* Show icon on hover (unfolded state - shows "can fold" indicator) */
+      .markdown-body h1:hover::before,
+      .markdown-body h2:hover::before,
+      .markdown-body h3:hover::before,
+      .markdown-body h4:hover::before,
+      .markdown-body h5:hover::before,
+      .markdown-body h6:hover::before {
+        opacity: 0.6;
+      }
+
+      /* When folded globally: show "expand" icon (right-pointing) */
+      body.github-comments-folded .markdown-body:not(.comment-expanded) h1::before,
+      body.github-comments-folded .markdown-body:not(.comment-expanded) h2::before,
+      body.github-comments-folded .markdown-body:not(.comment-expanded) h3::before,
+      body.github-comments-folded .markdown-body:not(.comment-expanded) h4::before,
+      body.github-comments-folded .markdown-body:not(.comment-expanded) h5::before,
+      body.github-comments-folded .markdown-body:not(.comment-expanded) h6::before {
+        content: '▸';
         opacity: 0.5;
       }
 
-      /* When folded: always show expand indicator (▸) */
-      body.github-comments-folded .markdown-body:not(.comment-expanded) > :first-child::before {
-        content: '▸';
-        opacity: 0.7;
-      }
-
-      /* When folded: expanded sections show collapse indicator (▾) */
-      body.github-comments-folded .markdown-body.comment-expanded > :first-child::before {
+      /* When folded: expanded comments show "collapse" icon */
+      body.github-comments-folded .markdown-body.comment-expanded h1::before,
+      body.github-comments-folded .markdown-body.comment-expanded h2::before,
+      body.github-comments-folded .markdown-body.comment-expanded h3::before,
+      body.github-comments-folded .markdown-body.comment-expanded h4::before,
+      body.github-comments-folded .markdown-body.comment-expanded h5::before,
+      body.github-comments-folded .markdown-body.comment-expanded h6::before {
         content: '▾';
-        opacity: 0.7;
+        opacity: 0.5;
       }
 
-      /* Hover states when folded */
-      body.github-comments-folded .markdown-body:hover > :first-child::before {
+      /* Make icons more visible on hover */
+      body.github-comments-folded .markdown-body h1:hover::before,
+      body.github-comments-folded .markdown-body h2:hover::before,
+      body.github-comments-folded .markdown-body h3:hover::before,
+      body.github-comments-folded .markdown-body h4:hover::before,
+      body.github-comments-folded .markdown-body h5:hover::before,
+      body.github-comments-folded .markdown-body h6:hover::before {
         opacity: 1;
         color: #0969da;
       }
