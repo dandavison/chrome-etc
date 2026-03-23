@@ -15,6 +15,7 @@
     {
       "matches": ["https://github.com/*"],
       "js": [
+        "content/github-comment-copy.js",
         "content/github-comment-editor.js",
         "content/github-fullwidth.js",
         "content/github-mermaid-cleaner.js",
@@ -41,6 +42,7 @@
   },
   "host_permissions": [
     "http://wormhole:7117/*",
+    "https://api.github.com/*",
     "https://temporaltechnologies.slack.com/*",
     "https://temporalio.slack.com/*"
   ],
