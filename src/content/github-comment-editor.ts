@@ -72,10 +72,7 @@ function logEditor(...args: unknown[]) { if (DEBUG_EDITOR) console.log(...args);
       });
     }, true);
 
-    // Listen for double-click to edit specific comment
-    document.addEventListener('dblclick', handleDoubleClick, true);
-
-    logEditor('[GitHub Comment Editor] Event listeners attached (Shift+Cmd+P and double-click)');
+    logEditor('[GitHub Comment Editor] Event listeners attached (Shift+Cmd+P)');
   }
 
   function isGitHubIssuePage(): boolean {
@@ -130,125 +127,6 @@ function logEditor(...args: unknown[]) { if (DEBUG_EDITOR) console.log(...args);
         editCurrentComment();
       }
     }
-  }
-
-  function handleDoubleClick(event: MouseEvent): void {
-    logEditor('[GitHub Comment Editor] Double-click detected on:', event.target);
-
-    // Find the parent comment container from where the user double-clicked
-    const target = event.target as HTMLElement;
-
-    // GitHub's DOM structure:
-    // - Comments: <div id="issuecomment-XXX" data-testid="comment-header">
-    // - Issue body: Within [data-testid="issue-viewer-container"] but NOT in an issuecomment
-
-    let commentContainer: HTMLElement | null = null;
-
-    // Strategy: Walk up the DOM tree looking for either a comment or the issue body
-    let current: HTMLElement | null = target;
-    let foundIssueViewer = false;
-    let depth = 0;
-
-    logEditor('[GitHub Comment Editor] Walking up DOM tree to find container...');
-
-    while (current && !commentContainer && depth < 20) {
-      const dataTestId = current.getAttribute('data-testid');
-
-      // Log each level for debugging
-      logEditor(`[GitHub Comment Editor] Level ${depth}: ${current.tagName} id="${current.id}" data-testid="${dataTestId}" class="${current.className?.substring(0, 50)}"`);
-
-      // Check if this element is a comment using old ID format
-      if (current.id && current.id.startsWith('issuecomment-')) {
-        logEditor('[GitHub Comment Editor] Found issue comment by ID:', current.id);
-        commentContainer = current;
-        break;
-      }
-
-      // Check if this element is a comment using new data-testid format
-      // Comments have data-testid like "comment-viewer-outer-box-XXX" or "timeline-row-border-XXX"
-      if (dataTestId && (
-        dataTestId.startsWith('comment-viewer-outer-box-') ||
-        dataTestId.startsWith('timeline-row-border-')
-      )) {
-        const commentId = dataTestId.split('-').pop();
-        logEditor('[GitHub Comment Editor] Found issue comment by data-testid:', commentId);
-        commentContainer = current;
-        break;
-      }
-
-      // Check if this is a comment header
-      if (dataTestId === 'comment-header') {
-        logEditor('[GitHub Comment Editor] Found comment header, looking for parent with comment identifier...');
-        // Look up for a comment container
-        let parent = current.parentElement;
-        while (parent && depth < 15) {
-          const parentTestId = parent.getAttribute('data-testid');
-          if (parent.id?.startsWith('issuecomment-') ||
-              parentTestId?.startsWith('comment-viewer-outer-box-') ||
-              parentTestId?.startsWith('timeline-row-border-')) {
-            logEditor('[GitHub Comment Editor] Found comment container:', parent.id || parentTestId);
-            commentContainer = parent;
-            break;
-          }
-          parent = parent.parentElement;
-        }
-        if (commentContainer) break;
-      }
-
-      // Track if we've seen the issue viewer container
-      if (dataTestId === 'issue-viewer-container' ||
-          current.className?.includes('IssueBodyViewer')) {
-        foundIssueViewer = true;
-      }
-
-      current = current.parentElement;
-      depth++;
-    }
-
-    // If no comment was found but we're inside the issue viewer, treat as issue description
-    if (!commentContainer && foundIssueViewer) {
-      logEditor('[GitHub Comment Editor] No comment found, but inside issue viewer - treating as issue description');
-      // Use the issue viewer container as the target
-      commentContainer = document.querySelector('[data-testid="issue-viewer-container"]') as HTMLElement;
-    }
-
-    if (!commentContainer) {
-      logEditor('[GitHub Comment Editor] Double-click was not inside a comment or issue body');
-      logEditor('[GitHub Comment Editor] Target element chain:');
-      let current: HTMLElement | null = target;
-      for (let i = 0; i < 5 && current; i++) {
-        logEditor(`  Level ${i}: ${current.tagName} id="${current.id}" class="${current.className?.substring(0, 50)}"`);
-        current = current.parentElement;
-      }
-      return;
-    }
-
-    logEditor('[GitHub Comment Editor] Double-click inside:', commentContainer.id || 'issue-body');
-    logEditor('[GitHub Comment Editor] Container type:', commentContainer.id?.startsWith('issuecomment') ? 'comment' : 'issue-body');
-
-    // Don't trigger if user is double-clicking in an already editable field
-    const activeElement = document.activeElement;
-    if (activeElement && (
-      activeElement.tagName === 'INPUT' ||
-      activeElement.tagName === 'TEXTAREA' ||
-      activeElement.getAttribute('contenteditable') === 'true'
-    )) {
-      logEditor('[GitHub Comment Editor] User is in an input field, not triggering');
-      return;
-    }
-
-    // Prevent text selection from the double-click
-    event.preventDefault();
-    event.stopPropagation();
-
-    // Clear any text selection that may have occurred
-    const selection = window.getSelection();
-    if (selection) {
-      selection.removeAllRanges();
-    }
-
-    // Edit this specific comment
-    editSpecificComment(commentContainer);
   }
 
   function editCurrentComment(): void {
