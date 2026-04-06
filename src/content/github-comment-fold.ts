@@ -83,8 +83,8 @@ function logFold(...args: unknown[]) { if (DEBUG_FOLD) console.log(...args); }
 
   function isGitHubIssuePage(): boolean {
     const url = window.location.href;
-    // Only issues and discussions, not PRs
-    return /github\.com\/[^\/]+\/[^\/]+\/(issues|discussions)/.test(url);
+    // Only dandavison/log issues and discussions
+    return /github\.com\/dandavison\/log\/(issues|discussions)/.test(url);
   }
 
   function handleKeyPress(event: KeyboardEvent): void {
