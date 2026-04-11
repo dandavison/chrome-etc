@@ -13,7 +13,10 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://github.com/*"],
+      "matches": [
+        "https://github.com/*",
+        "https://gist.github.com/dandavison/*"
+      ],
       "js": [
         "content/github-comment-copy.js",
         "content/github-comment-editor.js",
