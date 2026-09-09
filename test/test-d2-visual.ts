@@ -17,7 +17,7 @@ import path from 'path';
 import fs from 'fs';
 
 const SCREENSHOTS_DIR = path.join(__dirname, 'screenshots');
-const SERVICE = path.join(__dirname, '..', 'bin', 'd2-render');
+const SERVICE = path.join(__dirname, '..', 'src', 'd2', 'd2-serve');
 const PORT = 7119;
 const FIXTURE_URL = 'https://github.com/dandavison/test/issues/1';
 
@@ -74,15 +74,32 @@ async function capture(page: Page, name: string): Promise<void> {
 async function run(): Promise<void> {
   fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
 
-  const service = spawn(SERVICE, { stdio: 'inherit' });
+  // Detached so teardown can take out the whole group: killing the uv wrapper
+  // alone would leave its python child running and holding stdio open.
+  const service = spawn(SERVICE, { stdio: 'ignore', detached: true });
   service.on('error', e => {
     console.error(`could not start ${SERVICE}: ${e.message}`);
     process.exit(1);
   });
-  await waitForPort(PORT, 15000);
 
+  try {
+    await waitForPort(PORT, 15000);
+    await checkFixture();
+  } finally {
+    if (service.pid && service.exitCode === null) process.kill(-service.pid, 'SIGTERM');
+  }
+
+  if (failures.length) {
+    console.error(`\n${failures.length} failure(s):\n${failures.map(f => `  - ${f}`).join('\n')}`);
+    process.exit(1);
+  }
+  console.log('\nAll checks passed. Verify the screenshots in test/screenshots/ look right.');
+}
+
+async function checkFixture(): Promise<void> {
   const extensionPath = path.join(__dirname, '..', 'dist');
   const context = await chromium.launchPersistentContext('', {
+    channel: 'chrome',
     headless: false,
     args: [
       `--disable-extensions-except=${extensionPath}`,
@@ -109,7 +126,7 @@ async function run(): Promise<void> {
 
     check(await page.locator('.ghd2-diagram svg[data-d2-version]').count() === 1,
       'valid d2 block renders one d2-produced SVG');
-    check(await page.locator('.ghd2-diagram svg').isVisible(),
+    check(await page.locator('.ghd2-diagram svg').first().isVisible(),
       'rendered diagram is visible');
     check(await page.locator('.highlight-source-d2').first().isHidden(),
       'source of the rendered block is hidden');
@@ -131,19 +148,12 @@ async function run(): Promise<void> {
 
     await page.locator('.ghd2-toggle').first().click();
     await page.waitForTimeout(300);
-    check(await page.locator('.ghd2-diagram svg').isVisible(),
+    check(await page.locator('.ghd2-diagram svg').first().isVisible(),
       'toggling back restores the diagram');
     await capture(page, 'd2-03-diagram-again');
   } finally {
     await context.close();
-    service.kill();
   }
-
-  if (failures.length) {
-    console.error(`\n${failures.length} failure(s):\n${failures.map(f => `  - ${f}`).join('\n')}`);
-    process.exit(1);
-  }
-  console.log('\nAll checks passed. Verify the screenshots in test/screenshots/ look right.');
 }
 
 run().catch(e => { console.error(e); process.exit(1); });

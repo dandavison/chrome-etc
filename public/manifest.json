@@ -22,7 +22,8 @@
         "content/github-comment-editor.js",
         "content/github-fullwidth.js",
         "content/github-mermaid-cleaner.js",
-        "content/github-comment-fold.js"
+        "content/github-comment-fold.js",
+        "d2/content.js"
       ],
       "run_at": "document_idle"
     },
@@ -45,6 +46,7 @@
   },
   "host_permissions": [
     "http://wormhole:7117/*",
+    "http://127.0.0.1:7119/*",
     "https://api.github.com/*",
     "https://temporaltechnologies.slack.com/*",
     "https://temporalio.slack.com/*"

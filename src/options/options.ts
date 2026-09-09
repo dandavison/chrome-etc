@@ -6,6 +6,7 @@ const FEATURE_IDS = [
   'github-fullwidth',
   'github-mermaid-cleaner',
   'github-comment-fold',
+  'github-d2',
   'keybr-finger-colors',
 ] as const;
 
@@ -18,6 +19,7 @@ const DEFAULT_SETTINGS: Settings = {
   'github-fullwidth': true,
   'github-mermaid-cleaner': true,
   'github-comment-fold': true,
+  'github-d2': true,
   'keybr-finger-colors': true,
 };
 
