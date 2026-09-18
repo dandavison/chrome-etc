@@ -14,7 +14,7 @@ const D2_DIAGRAM_ICON = '<svg aria-hidden="true" height="16" viewBox="0 0 16 16"
 const D2_STYLES = `
 .ghd2-wrapper { position: relative; margin-bottom: 16px; }
 .ghd2-diagram { overflow-x: auto; }
-.ghd2-diagram > svg { max-width: 100%; height: auto; }
+.ghd2-diagram > svg { max-width: 100%; max-height: 85vh; width: auto; height: auto; }
 .ghd2-toggle {
   position: absolute; top: 4px; right: 4px; opacity: 0; transition: opacity 0.1s;
   display: inline-flex; align-items: center; padding: 4px 6px; cursor: pointer;

@@ -3,9 +3,9 @@
  * Visual test for GitHub d2 diagram rendering.
  *
  * Serves a fixture at a github.com URL so the content script matches, using
- * GitHub's real CSP, and checks that d2 blocks become SVG, that a broken
- * diagram reports its error, that non-d2 blocks are untouched, and that the
- * source toggle works.
+ * GitHub's real CSP, and checks that d2 blocks become SVG, that a tall diagram
+ * is scaled to fit the viewport height, that a broken diagram reports its
+ * error, that non-d2 blocks are untouched, and that the source toggle works.
  *
  * Run with: npx ts-node --project tsconfig.test.json test/test-d2-visual.ts
  */
@@ -20,6 +20,9 @@ const SCREENSHOTS_DIR = path.join(__dirname, 'screenshots');
 const SERVICE = path.join(__dirname, '..', 'src', 'd2', 'd2-serve');
 const PORT = 7119;
 const FIXTURE_URL = 'https://github.com/dandavison/test/issues/1';
+const VIEWPORT = { width: 1400, height: 900 };
+
+const TALL_D2_SOURCE = Array.from({ length: 20 }, (_, i) => `n${i} -> n${i + 1}`).join('\n');
 
 const GITHUB_CSP = [
   "default-src 'none'",
@@ -41,6 +44,8 @@ const FIXTURE_HTML = `<!DOCTYPE html>
 <div class="highlight highlight-source-go"><pre class="notranslate"><span class="pl-k">func</span> <span class="pl-s1">main</span>() {}</pre></div>
 <p>Broken diagram:</p>
 <div class="highlight highlight-source-d2"><pre class="notranslate"><span class="pl-ent">x </span>-&gt; : {</pre></div>
+<p>Tall diagram, must be scaled to fit the viewport height:</p>
+<div class="highlight highlight-source-d2"><pre class="notranslate">${TALL_D2_SOURCE}</pre></div>
 </div></body></html>`;
 
 const failures: string[] = [];
@@ -106,7 +111,7 @@ async function checkFixture(): Promise<void> {
       `--load-extension=${extensionPath}`,
       '--no-sandbox',
     ],
-    viewport: { width: 1400, height: 900 },
+    viewport: VIEWPORT,
   });
 
   try {
@@ -124,8 +129,11 @@ async function checkFixture(): Promise<void> {
     await page.goto(FIXTURE_URL);
     await page.waitForSelector('.ghd2-diagram svg', { timeout: 20000 });
 
-    check(await page.locator('.ghd2-diagram svg[data-d2-version]').count() === 1,
-      'valid d2 block renders one d2-produced SVG');
+    await page.waitForFunction(
+      () => document.querySelectorAll('.ghd2-diagram svg[data-d2-version]').length === 2,
+      null, { timeout: 20000 });
+    check(await page.locator('.ghd2-diagram svg[data-d2-version]').count() === 2,
+      'both valid d2 blocks render d2-produced SVG');
     check(await page.locator('.ghd2-diagram svg').first().isVisible(),
       'rendered diagram is visible');
     check(await page.locator('.highlight-source-d2').first().isHidden(),
@@ -136,6 +144,13 @@ async function checkFixture(): Promise<void> {
       'compile error mentions d2');
     check(await page.locator('.highlight-source-go').isVisible(),
       'non-d2 code block is left alone');
+
+    const tall = page.locator('.ghd2-diagram svg[data-d2-version]').last();
+    const tallBox = await tall.boundingBox();
+    check(!!tallBox && tallBox.height <= VIEWPORT.height,
+      `tall diagram fits the viewport height (rendered ${tallBox?.height}px, viewport ${VIEWPORT.height}px)`);
+    check(!!tallBox && tallBox.width <= VIEWPORT.width,
+      'tall diagram is not wider than the viewport');
     await capture(page, 'd2-01-diagram');
 
     await page.locator('.ghd2-toggle').first().click();
