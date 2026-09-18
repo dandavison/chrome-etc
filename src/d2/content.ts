@@ -24,6 +24,8 @@ const D2_STYLES = `
   color: var(--fgColor-muted, #656d76);
 }
 .ghd2-wrapper:hover .ghd2-toggle, .ghd2-toggle:focus { opacity: 1; }
+/* Move clear of GitHub's own copy button, which sits top-right of the source block. */
+.ghd2-toggle.ghd2-beside-copy { right: 40px; }
 .ghd2-error {
   margin-top: 4px; white-space: pre-wrap;
   font-family: ui-monospace, SFMono-Regular, monospace; font-size: 12px;
@@ -104,6 +106,7 @@ const D2_STYLES = `
   function describe(button: HTMLButtonElement, showingDiagram: boolean): void {
     button.innerHTML = showingDiagram ? D2_CODE_ICON : D2_DIAGRAM_ICON;
     button.title = showingDiagram ? 'Show d2 source' : 'Show diagram';
+    button.classList.toggle('ghd2-beside-copy', !showingDiagram);
   }
 
   function errorNote(message: string): HTMLElement {
