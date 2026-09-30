@@ -23,6 +23,7 @@
         "content/github-fullwidth.js",
         "content/github-mermaid-cleaner.js",
         "content/github-comment-fold.js",
+        "content/github-sticky-comment-heading.js",
         "d2/content.js"
       ],
       "run_at": "document_idle"

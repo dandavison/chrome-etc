@@ -7,9 +7,10 @@
     "build": "npm run clean && tsc && npm run copy-static",
     "copy-static": "cp public/manifest.json public/options.html public/icon-*.png dist/",
     "watch": "tsc --watch",
-    "test": "npm run test:visual && npm run test:d2",
+    "test": "npm run test:visual && npm run test:d2 && npm run test:sticky",
     "test:visual": "npm run build && npx ts-node --project tsconfig.test.json test/test-comment-fold-visual.ts",
     "test:d2": "npm run build && npx ts-node --project tsconfig.test.json test/test-d2-visual.ts",
+    "test:sticky": "npm run build && npx ts-node --project tsconfig.test.json test/test-sticky-comment-heading.ts",
     "package": "npm run build && cd dist && zip -r ../extension.zip *"
   },
   "dependencies": {
