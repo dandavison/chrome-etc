@@ -28,11 +28,11 @@
     font-weight: 600;
     line-height: 1.25;
   `;
-  // Sizes match GitHub's markdown h1 and h2
+  // Sizes match GitHub's markdown h1 and h3
   const title = document.createElement('div');
-  title.style.cssText = 'font-size: 2em; margin-bottom: 8px;';
+  title.style.cssText = 'font-size: 2em; margin-bottom: 8px; color: var(--fgColor-muted, var(--color-fg-muted));';
   const heading = document.createElement('div');
-  heading.style.cssText = 'font-size: 1.5em;';
+  heading.style.cssText = 'font-size: 1.25em;';
   label.append(title, heading);
   document.body.appendChild(label);
 
