@@ -1,8 +1,9 @@
 #!/usr/bin/env npx ts-node --project tsconfig.test.json
 /**
- * Test: while the reader scrolls through a comment, the issue title and the
- * comment's leading H1 (in the H1's font) are shown in the left margin below
- * GitHub's sticky issue header, without covering the comment.
+ * Test: the issue title is shown in the left margin, below GitHub's sticky issue
+ * header, whenever the real title is scrolled out of view. While the reader
+ * scrolls through a comment, the comment's leading H1 is shown below it in a
+ * smaller font, without covering the comment.
  *
  * Chrome 153 ignores --load-extension, so the built content script is injected
  * directly with a chrome.storage stub.
@@ -34,34 +35,53 @@ async function run(): Promise<void> {
   await page.waitForTimeout(500);
 
   const comment = page.locator('.markdown-body', { has: page.locator(`h1:text-is("${HEADING}")`) }).last();
-  const commentTop = await comment.evaluate(el => el.getBoundingClientRect().top + window.scrollY);
-  await page.evaluate(y => window.scrollTo(0, y), commentTop + 200);
-  await page.waitForTimeout(500);
+  const commentBox = await comment.evaluate(el => {
+    const r = el.getBoundingClientRect();
+    return { top: r.top + window.scrollY, bottom: r.bottom + window.scrollY, left: r.left };
+  });
+  const scrollAndReadMargin = async (scrollY: number) => {
+    await page.evaluate(y => window.scrollTo(0, y), scrollY);
+    await page.waitForTimeout(500);
+    return page.evaluate(marginTexts, GITHUB_STICKY_HEADER_HEIGHT);
+  };
 
-  const result = await comment.evaluate((el, { y, heading }) => {
-    const columnLeft = el.getBoundingClientRect().left;
-    const textAt = (py: number) => document.elementFromPoint(20, py)?.textContent?.trim().slice(0, 80) ?? null;
-    let headingY = y + 20;
-    while (headingY < y + 300 && textAt(headingY) !== heading) headingY += 4;
-    const inColumn = document.elementFromPoint(columnLeft + 10, y + 20);
-    const font = (e: Element | null) => e && getComputedStyle(e).font;
-    return {
-      marginTopText: textAt(y + 20),
-      marginHeadingText: textAt(headingY),
-      columnTag: inColumn?.closest('h1')?.tagName ?? null,
-      fontMatches: font(document.elementFromPoint(20, headingY)) === font(el.querySelector('h1')),
-    };
-  }, { y: GITHUB_STICKY_HEADER_HEIGHT, heading: HEADING });
+  const atTop = await scrollAndReadMargin(0);
+  const betweenComments = await scrollAndReadMargin(commentBox.bottom - GITHUB_STICKY_HEADER_HEIGHT + 10);
+  const midComment = await scrollAndReadMargin(commentBox.top + 200);
+  const columnTag = await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.closest('h1')?.tagName ?? null,
+    { x: commentBox.left + 10, y: GITHUB_STICKY_HEADER_HEIGHT + 20 });
   await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'sticky-comment-heading.png') });
   await browser.close();
 
-  const ok = result.marginTopText === ISSUE_TITLE && result.marginHeadingText === HEADING
-    && result.columnTag === null && result.fontMatches;
-  if (!ok) {
-    console.error(`FAIL: expected "${ISSUE_TITLE}" above "${HEADING}" (in the H1's font) in the left margin, and no H1 over the comment; found ${JSON.stringify(result)}`);
+  const texts = (m: MarginText[]) => m.map(t => t.text);
+  const [title, heading] = midComment;
+  const failures = [
+    texts(atTop).includes(ISSUE_TITLE) && `title shown in margin while real title in view: ${JSON.stringify(atTop)}`,
+    JSON.stringify(texts(betweenComments)) !== JSON.stringify([ISSUE_TITLE]) && `between comments, expected title only: ${JSON.stringify(betweenComments)}`,
+    JSON.stringify(texts(midComment)) !== JSON.stringify([ISSUE_TITLE, HEADING]) && `mid-comment, expected title then heading: ${JSON.stringify(midComment)}`,
+    !(title?.fontSize > heading?.fontSize) && `title font must be larger than heading font: ${JSON.stringify(midComment)}`,
+    columnTag !== null && 'an H1 covers the comment',
+  ].filter(Boolean);
+  if (failures.length) {
+    failures.forEach(f => console.error(`FAIL: ${f}`));
     process.exit(1);
   }
-  console.log(`PASS: "${ISSUE_TITLE}" above "${HEADING}" (in the H1's font) in the left margin while scrolled mid-comment`);
+  console.log('PASS: margin shows title when real title is out of view, and title above smaller comment heading mid-comment');
+}
+
+type MarginText = { text: string; fontSize: number };
+
+// Distinct texts found scanning down the left margin from below the sticky header
+function marginTexts(headerHeight: number): MarginText[] {
+  const found: MarginText[] = [];
+  for (let y = headerHeight; y < headerHeight + 300; y += 4) {
+    const el = document.elementFromPoint(20, y);
+    const text = el?.textContent?.trim().slice(0, 80);
+    if (el && text && el.childElementCount === 0 && found.at(-1)?.text !== text) {
+      found.push({ text, fontSize: parseFloat(getComputedStyle(el).fontSize) });
+    }
+  }
+  return found;
 }
 
 run().catch(e => { console.error(e); process.exit(1); });
