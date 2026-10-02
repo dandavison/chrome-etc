@@ -1,6 +1,6 @@
 // GitHub Sticky Comment Heading
-// While scrolling through a comment, shows the issue title and the comment's leading H1
-// in the left margin
+// Shows the issue title in the left margin whenever the real title is out of view, and
+// below it, while scrolling through a comment, the comment's leading H1
 
 (async function() {
   const result = await chrome.storage.sync.get('settings');
@@ -25,16 +25,14 @@
     z-index: 10;
     color: var(--fgColor-default, var(--color-fg-default));
     overflow-wrap: break-word;
-  `;
-  const title = document.createElement('div');
-  title.style.cssText = `
-    font-size: 14px;
     font-weight: 600;
-    line-height: 1.5;
-    margin-bottom: 4px;
-    color: var(--fgColor-muted, var(--color-fg-muted));
+    line-height: 1.25;
   `;
+  // Sizes match GitHub's markdown h1 and h2
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size: 2em; margin-bottom: 8px;';
   const heading = document.createElement('div');
+  heading.style.cssText = 'font-size: 1.5em;';
   label.append(title, heading);
   document.body.appendChild(label);
 
@@ -51,13 +49,16 @@
 
   function update(): void {
     const top = stickyHeaderBottom();
-    const h1 = headingOfCommentAt(top);
-    const width = h1 ? h1.parentElement!.getBoundingClientRect().left - 2 * MARGIN_GAP : 0;
-    label.hidden = !h1 || width < MIN_LABEL_WIDTH;
-    if (h1 && !label.hidden) {
-      title.textContent = document.querySelector('[data-testid="issue-title"]')?.textContent ?? '';
-      heading.textContent = h1.textContent;
-      heading.style.font = getComputedStyle(h1).font;
+    const realTitle = document.querySelector('[data-testid="issue-title"]');
+    const comment = document.querySelector('.markdown-body');
+    const width = comment ? comment.getBoundingClientRect().left - 2 * MARGIN_GAP : 0;
+    label.hidden = !realTitle || !comment || width < MIN_LABEL_WIDTH
+      || realTitle.getBoundingClientRect().bottom > top;
+    if (realTitle && comment && !label.hidden) {
+      const h1 = headingOfCommentAt(top);
+      title.textContent = realTitle.textContent;
+      heading.textContent = h1?.textContent ?? '';
+      label.style.fontSize = getComputedStyle(comment).fontSize;
       label.style.top = `${top + MARGIN_GAP}px`;
       label.style.width = `${width}px`;
     }
