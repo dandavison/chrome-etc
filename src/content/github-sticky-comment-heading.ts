@@ -10,6 +10,7 @@
   }
 
   const MARGIN_GAP = 12;
+  const COMMENT_BOX_PADDING = 16;
   // Below this width (e.g. in github-fullwidth mode) the label is not shown.
   const MIN_LABEL_WIDTH = 80;
 
@@ -51,7 +52,7 @@
     const top = stickyHeaderBottom();
     const realTitle = document.querySelector('[data-testid="issue-title"]');
     const comment = document.querySelector('.markdown-body');
-    const width = comment ? comment.getBoundingClientRect().left - 2 * MARGIN_GAP : 0;
+    const width = comment ? comment.getBoundingClientRect().left - COMMENT_BOX_PADDING - 2 * MARGIN_GAP : 0;
     label.hidden = !realTitle || !comment || width < MIN_LABEL_WIDTH
       || realTitle.getBoundingClientRect().bottom > top;
     if (realTitle && comment && !label.hidden) {
