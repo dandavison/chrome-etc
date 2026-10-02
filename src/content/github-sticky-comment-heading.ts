@@ -1,5 +1,6 @@
 // GitHub Sticky Comment Heading
-// While scrolling through a comment, shows its leading H1 in the left margin
+// While scrolling through a comment, shows the issue title and the comment's leading H1
+// in the left margin
 
 (async function() {
   const result = await chrome.storage.sync.get('settings');
@@ -25,6 +26,16 @@
     color: var(--fgColor-default, var(--color-fg-default));
     overflow-wrap: break-word;
   `;
+  const title = document.createElement('div');
+  title.style.cssText = `
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 4px;
+    color: var(--fgColor-muted, var(--color-fg-muted));
+  `;
+  const heading = document.createElement('div');
+  label.append(title, heading);
   document.body.appendChild(label);
 
   let scheduled = false;
@@ -40,12 +51,13 @@
 
   function update(): void {
     const top = stickyHeaderBottom();
-    const heading = headingOfCommentAt(top);
-    const width = heading ? heading.parentElement!.getBoundingClientRect().left - 2 * MARGIN_GAP : 0;
-    label.hidden = !heading || width < MIN_LABEL_WIDTH;
-    if (heading && !label.hidden) {
-      label.textContent = heading.textContent;
-      label.style.font = getComputedStyle(heading).font;
+    const h1 = headingOfCommentAt(top);
+    const width = h1 ? h1.parentElement!.getBoundingClientRect().left - 2 * MARGIN_GAP : 0;
+    label.hidden = !h1 || width < MIN_LABEL_WIDTH;
+    if (h1 && !label.hidden) {
+      title.textContent = document.querySelector('[data-testid="issue-title"]')?.textContent ?? '';
+      heading.textContent = h1.textContent;
+      heading.style.font = getComputedStyle(h1).font;
       label.style.top = `${top + MARGIN_GAP}px`;
       label.style.width = `${width}px`;
     }
