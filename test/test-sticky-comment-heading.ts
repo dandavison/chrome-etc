@@ -3,7 +3,7 @@
  * Test: the issue title is shown in the left margin, below GitHub's sticky issue
  * header, whenever the real title is scrolled out of view. While the reader
  * scrolls through a comment, the comment's leading H1 is shown below it in a
- * smaller font, without covering the comment.
+ * smaller font and different color, without covering the comment.
  *
  * Chrome 153 ignores --load-extension, so the built content script is injected
  * directly with a chrome.storage stub.
@@ -59,7 +59,8 @@ async function run(): Promise<void> {
     texts(atTop).includes(ISSUE_TITLE) && `title shown in margin while real title in view: ${JSON.stringify(atTop)}`,
     JSON.stringify(texts(betweenComments)) !== JSON.stringify([ISSUE_TITLE]) && `between comments, expected title only: ${JSON.stringify(betweenComments)}`,
     JSON.stringify(texts(midComment)) !== JSON.stringify([ISSUE_TITLE, HEADING]) && `mid-comment, expected title then heading: ${JSON.stringify(midComment)}`,
-    !(title?.fontSize > heading?.fontSize) && `title font must be larger than heading font: ${JSON.stringify(midComment)}`,
+    !(title?.fontSize >= 1.5 * heading?.fontSize) && `title font must be at least 1.5x heading font: ${JSON.stringify(midComment)}`,
+    title?.color === heading?.color && `title and heading must differ in color: ${JSON.stringify(midComment)}`,
     columnTag !== null && 'an H1 covers the comment',
   ].filter(Boolean);
   if (failures.length) {
@@ -69,7 +70,7 @@ async function run(): Promise<void> {
   console.log('PASS: margin shows title when real title is out of view, and title above smaller comment heading mid-comment');
 }
 
-type MarginText = { text: string; fontSize: number };
+type MarginText = { text: string; fontSize: number; color: string };
 
 // Distinct texts found scanning down the left margin from below the sticky header
 function marginTexts(headerHeight: number): MarginText[] {
@@ -78,7 +79,7 @@ function marginTexts(headerHeight: number): MarginText[] {
     const el = document.elementFromPoint(20, y);
     const text = el?.textContent?.trim().slice(0, 80);
     if (el && text && el.childElementCount === 0 && found.at(-1)?.text !== text) {
-      found.push({ text, fontSize: parseFloat(getComputedStyle(el).fontSize) });
+      found.push({ text, fontSize: parseFloat(getComputedStyle(el).fontSize), color: getComputedStyle(el).color });
     }
   }
   return found;
