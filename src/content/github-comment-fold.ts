@@ -15,8 +15,7 @@ function logFold(...args: unknown[]) { if (DEBUG_FOLD) console.log(...args); }
 
   logFold('[GitHub Comment Fold] Script initializing...');
 
-  // State to track whether fold mode is enabled
-  let isFolded = localStorage.getItem('github-comment-fold-enabled') === 'true';
+  let isFolded = true;
 
   // Configuration
   const FOLD_MAX_HEIGHT = '2.8em'; // Show full heading without clipping
@@ -41,10 +40,7 @@ function logFold(...args: unknown[]) { if (DEBUG_FOLD) console.log(...args); }
     // Add base styles for clickable headings (always present)
     addBaseStyles();
 
-    // Apply saved state on page load
-    if (isFolded) {
-      setTimeout(() => applyFold(), 1000); // Wait for page to fully render
-    }
+    setTimeout(() => applyFold(), 1000); // Wait for page to fully render
 
     // Listen for keyboard shortcut (Cmd/Ctrl+Shift+F)
     document.addEventListener('keydown', handleKeyPress, true);
@@ -153,7 +149,6 @@ function logFold(...args: unknown[]) { if (DEBUG_FOLD) console.log(...args); }
 
   function toggleFold(): void {
     isFolded = !isFolded;
-    localStorage.setItem('github-comment-fold-enabled', String(isFolded));
 
     if (isFolded) {
       applyFold();
