@@ -3,9 +3,11 @@
 // Toggle with Cmd+Shift+F (Mac) or Ctrl+Shift+F (Windows/Linux)
 
 const DEBUG_FOLD = false;
-function logFold(...args: unknown[]) { if (DEBUG_FOLD) console.log(...args); }
+function logFold(...args: unknown[]) {
+  if (DEBUG_FOLD) console.log(...args);
+}
 
-(async function() {
+(async function () {
   const result = await chrome.storage.sync.get('settings');
   const settings = result.settings || {};
   if (settings['github-comment-fold'] === false) {
@@ -88,7 +90,9 @@ function logFold(...args: unknown[]) { if (DEBUG_FOLD) console.log(...args); }
 
   function handleKeyPress(event: KeyboardEvent): void {
     // Check for Cmd/Ctrl+Shift+F combination
-    const isModKey = navigator.platform.includes('Mac') ? event.metaKey : event.ctrlKey;
+    const isModKey = navigator.platform.includes('Mac')
+      ? event.metaKey
+      : event.ctrlKey;
 
     if (isModKey && event.shiftKey && event.key.toLowerCase() === 'f') {
       event.preventDefault();
@@ -120,7 +124,7 @@ function logFold(...args: unknown[]) { if (DEBUG_FOLD) console.log(...args); }
       const allMarkdownBodies = collectMarkdownBodyAncestors(markdownBody);
       const shouldExpand = !markdownBody.classList.contains('comment-expanded');
 
-      allMarkdownBodies.forEach(mb => {
+      allMarkdownBodies.forEach((mb) => {
         if (shouldExpand) {
           mb.classList.add('comment-expanded');
         } else {
@@ -128,7 +132,9 @@ function logFold(...args: unknown[]) { if (DEBUG_FOLD) console.log(...args); }
         }
       });
 
-      logFold(`[GitHub Comment Fold] Toggled ${allMarkdownBodies.length} .markdown-body elements, expanded=${shouldExpand}`);
+      logFold(
+        `[GitHub Comment Fold] Toggled ${allMarkdownBodies.length} .markdown-body elements, expanded=${shouldExpand}`,
+      );
     } else {
       // If not in fold mode, clicking a heading enables fold mode
       toggleFold();
@@ -214,7 +220,7 @@ function logFold(...args: unknown[]) { if (DEBUG_FOLD) console.log(...args); }
     document.body.classList.remove('github-comments-folded');
 
     // Clear all individual expanded states
-    document.querySelectorAll('.comment-expanded').forEach(el => {
+    document.querySelectorAll('.comment-expanded').forEach((el) => {
       el.classList.remove('comment-expanded');
     });
 
@@ -276,6 +282,7 @@ function logFold(...args: unknown[]) { if (DEBUG_FOLD) console.log(...args); }
     }
   }
 
-  logFold('[GitHub Comment Fold] Script loaded - Press Cmd/Ctrl+Shift+F to toggle');
+  logFold(
+    '[GitHub Comment Fold] Script loaded - Press Cmd/Ctrl+Shift+F to toggle',
+  );
 })();
-
