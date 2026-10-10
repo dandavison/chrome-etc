@@ -80,7 +80,10 @@ function logFold(...args: unknown[]) { if (DEBUG_FOLD) console.log(...args); }
   function isGitHubIssuePage(): boolean {
     const url = window.location.href;
     // Only temporalio/dandavison-log issues and discussions
-    return /github\.com\/temporalio\/dandavison-log\/(issues|discussions)/.test(url);
+    return (
+      /github\.com\/temporalio\/dandavison-log\/issues/.test(url) ||
+      /github\.com\/dandavison\/log-projects\/issues/.test(url)
+    );
   }
 
   function handleKeyPress(event: KeyboardEvent): void {
