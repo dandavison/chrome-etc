@@ -18,7 +18,6 @@
         "https://gist.github.com/dandavison/*"
       ],
       "js": [
-        "content/github-comment-copy.js",
         "content/github-comment-editor.js",
         "content/github-fullwidth.js",
         "content/github-mermaid-cleaner.js",

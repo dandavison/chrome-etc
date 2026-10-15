@@ -1,7 +1,6 @@
 // Options page script for dan-chrome-etc
 
 const FEATURE_IDS = [
-  'github-comment-copy',
   'github-comment-editor',
   'github-fullwidth',
   'github-mermaid-cleaner',
@@ -15,7 +14,6 @@ type FeatureId = typeof FEATURE_IDS[number];
 type Settings = Record<FeatureId, boolean>;
 
 const DEFAULT_SETTINGS: Settings = {
-  'github-comment-copy': true,
   'github-comment-editor': true,
   'github-fullwidth': true,
   'github-mermaid-cleaner': true,
