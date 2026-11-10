@@ -8,10 +8,11 @@
     "copy-static": "cp public/manifest.json public/options.html public/icon-*.png dist/ && npm run copy-vendor",
     "copy-vendor": "mkdir -p dist/vendor && cp node_modules/marked/lib/marked.umd.js node_modules/turndown/lib/turndown.browser.umd.js node_modules/turndown-plugin-gfm/dist/turndown-plugin-gfm.js dist/vendor/",
     "watch": "tsc --watch",
-    "test": "npm run test:visual && npm run test:d2 && npm run test:sticky",
+    "test": "npm run test:visual && npm run test:d2 && npm run test:sticky && npm run test:wysiwyg",
     "test:visual": "npm run build && npx ts-node --project tsconfig.test.json test/test-comment-fold-visual.ts",
     "test:d2": "npm run build && npx ts-node --project tsconfig.test.json test/test-d2-visual.ts",
     "test:sticky": "npm run build && npx ts-node --project tsconfig.test.json test/test-sticky-comment-heading.ts",
+    "test:wysiwyg": "npm run build && npx ts-node --project tsconfig.test.json test/test-wysiwyg-editor.ts",
     "package": "npm run build && cd dist && zip -r ../extension.zip *"
   },
   "dependencies": {
