@@ -91,6 +91,11 @@ function logWysiwyg(...args: unknown[]) {
         return prefix + content + (node.nextSibling ? '\n' : '');
       },
     });
+    // The gfm plugin appends a space after the checkbox, doubling the one marked leaves before the text.
+    service.addRule('taskListItems', {
+      filter: (node) => node.nodeName === 'INPUT' && (node as HTMLInputElement).type === 'checkbox' && node.parentNode?.nodeName === 'LI',
+      replacement: (_content, node) => ((node as HTMLInputElement).checked ? '[x]' : '[ ]'),
+    });
     // The gfm plugin emits single-tilde strikethrough.
     service.addRule('strikethrough', {
       filter: ['del', 's'],
