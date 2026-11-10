@@ -2,6 +2,7 @@
 
 const FEATURE_IDS = [
   'github-comment-editor',
+  'github-wysiwyg-editor',
   'github-fullwidth',
   'github-mermaid-cleaner',
   'github-comment-fold',
@@ -15,6 +16,7 @@ type Settings = Record<FeatureId, boolean>;
 
 const DEFAULT_SETTINGS: Settings = {
   'github-comment-editor': true,
+  'github-wysiwyg-editor': true,
   'github-fullwidth': true,
   'github-mermaid-cleaner': true,
   'github-comment-fold': true,
